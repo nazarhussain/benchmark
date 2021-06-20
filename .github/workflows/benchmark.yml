@@ -1,0 +1,62 @@
+name: Benchmark
+
+# only one can tun at a time.
+# Actions access a common cache entry and may corrupt it.
+concurrency: cd-benchmark
+
+on:
+  push:
+    branches:
+      - master
+      - benchmark
+
+env:
+  BENCHMARK_FILES_PATH: /home/runner/work/benchmark
+  BENCHMARK_RESULTS_PATH: /home/runner/work/benchmark/results.json
+  BENCHMARK_HISTORY_PATH: /home/runner/work/benchmark/history.json
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Bootstrap
+        run: yarn
+      # Run benchmark with custom tooling and stores the output to a file
+      - name: Run performance tests
+        run: yarn benchmark
+        env:
+          BENCHMARK_RESULTS_PATH: ${{env.BENCHMARK_RESULTS_PATH}}
+          BENCHMARK_RESULTS_CSV_DIR: ${{env.BENCHMARK_FILES_PATH}}
+
+      # Download previous benchmark result from cache (if exists)
+      - name: Download previous benchmark data
+        uses: actions/cache@v1
+        with:
+          path: ${{env.BENCHMARK_HISTORY_PATH}}
+          key: ${{ runner.os }}-benchmark-history-tmp
+
+      - name: Sanity check, are files there?
+        run: ls -ltr ${{env.BENCHMARK_FILES_PATH}}
+
+      # Upload results + history (even on error so partial results can be read)
+      - name: Upload full benchmark results
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: benchmark-data
+          path: ${{env.BENCHMARK_FILES_PATH}}
+
+      # Run `github-action-benchmark` action
+      - name: Store benchmark result
+        run: |
+          cd .github/workflows/benchmark
+          yarn
+          yarn run-action
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BENCHMARK_RESULTS_PATH: ${{env.BENCHMARK_RESULTS_PATH}}
+          BENCHMARK_HISTORY_PATH: ${{env.BENCHMARK_HISTORY_PATH}}
+          THRESHOLD: 2
+      # Upload the updated cache file for the next job by actions/cache

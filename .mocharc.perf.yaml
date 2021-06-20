@@ -1,0 +1,9 @@
+# Required to run benchmark
+require:
+  - ts-node/register
+  - src/mochaPlugin/mochaPlugin.ts
+reporter: src/mochaPlugin/reporter.ts
+# Extra props
+colors: true
+timeout: 5000
+exit: true

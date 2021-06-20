@@ -1,0 +1,22 @@
+{
+  "name": "benchmark",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:dapplion/benchmark.git",
+  "author": "dapplion <35266934+dapplion@users.noreply.github.com>",
+  "license": "MIT",
+  "scripts": {
+    "benchmark": "mocha --config ./.mocharc.perf.yaml 'test/**/*.perf.ts'"
+  },
+  "devDependencies": {
+    "@types/mocha": "^8.2.2",
+    "@types/node": "^15.12.4",
+    "mocha": "^9.0.1",
+    "ts-node": "^10.0.0",
+    "typescript": "^4.3.4"
+  },
+  "dependencies": {
+    "@actions/github": "^5.0.0",
+    "ajv": "^8.6.0"
+  }
+}
