@@ -57,13 +57,22 @@ export function readBenchmarkResults(filepath: string): BenchmarkResults {
 }
 
 export function readBenchmarkHistory(filepath: string): BenchmarkHistory {
-  const data = readJson<BenchmarkHistory>(filepath);
-  const validate = ajv.compile(benchmarkHistorySchema);
-  const valid = validate(data);
-  if (!valid) throw Error(`Invalid BenchmarkHistory ${JSON.stringify(validate.errors, null, 2)}`);
-  return data;
+  try {
+    const data = readJson<BenchmarkHistory>(filepath);
+    const validate = ajv.compile(benchmarkHistorySchema);
+    const valid = validate(data);
+    if (!valid) throw Error(`Invalid BenchmarkHistory ${JSON.stringify(validate.errors, null, 2)}`);
+    return data;
+  } catch (e) {
+    if (e.code === "ENOENT") {
+      console.warn(`No BenchmarkHistory file found at ${filepath}, creating a new one`, e);
+      return {benchmarks: {}};
+    } else {
+      throw e;
+    }
+  }
 }
 
-export function writeBenchmarkResults(filepath: string, data: BenchmarkHistory): void {
+export function writeBenchmarkHistory(filepath: string, data: BenchmarkHistory): void {
   writeJson(filepath, data);
 }

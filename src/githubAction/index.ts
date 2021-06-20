@@ -5,7 +5,7 @@ import {Benchmark, BenchmarkHistory, BenchComparision, Context, BenchmarkResult}
 import {commentToCommit, commetToPrUpdatable, getIsDefaultBranch} from "./utils/octokit";
 import {renderComment} from "./utils/render";
 import {getCurrentCommitInfo} from "./utils/git";
-import {readBenchmarkHistory, readBenchmarkResults, writeBenchmarkResults} from "./utils/benchmarkFiles";
+import {readBenchmarkHistory, readBenchmarkResults, writeBenchmarkHistory} from "./utils/benchmarkFiles";
 
 /**
  * 1. Read benchmark results from disk
@@ -192,7 +192,7 @@ function writeBenchmarkEntry(context: Context, history: BenchmarkHistory, newBen
 
   history.benchmarks[branch].push(newBench);
 
-  writeBenchmarkResults(context.benchmarkHistoryPath, history);
+  writeBenchmarkHistory(context.benchmarkHistoryPath, history);
 }
 
 function computeBenchComparision(currBench: Benchmark, prevBench: Benchmark | null): BenchComparision[] {
