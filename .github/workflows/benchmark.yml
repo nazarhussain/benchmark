@@ -39,9 +39,6 @@ jobs:
           path: ${{env.BENCHMARK_HISTORY_PATH}}
           key: ${{ runner.os }}-benchmark-history-tmp
 
-      - name: Sanity check, are files there?
-        run: ls -ltr ${{env.BENCHMARK_FILES_PATH}}
-
       # Upload results + history (even on error so partial results can be read)
       - name: Upload full benchmark results
         if: ${{ always() }}
