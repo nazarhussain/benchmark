@@ -6,7 +6,6 @@ const ajv = new Ajv({allErrors: true});
 
 /** TS type `BenchmarkResults` */
 const benchmarkResultsSchema = {
-  $schema: "http://json-schema.org/draft-04/schema#",
   type: "array",
   items: {
     type: "object",
@@ -17,13 +16,12 @@ const benchmarkResultsSchema = {
       totalMs: {type: "number"},
       factor: {type: "number"},
     },
-    required: ["id", "averageNs", "runsDone", "runsNs", "totalMs"],
+    required: ["id", "averageNs", "runsDone", "totalMs"],
   },
 };
 
 /** TS type `Benchmark` */
 const benchmarkSchema = {
-  $schema: "http://json-schema.org/draft-04/schema#",
   type: "object",
   properties: {
     commitSha: {type: "string"},
@@ -35,7 +33,6 @@ const benchmarkSchema = {
 
 /** TS type `BenchmarkHistory` */
 const benchmarkHistorySchema = {
-  $schema: "http://json-schema.org/draft-04/schema#",
   type: "object",
   properties: {
     benchmarks: {
