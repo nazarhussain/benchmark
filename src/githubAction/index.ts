@@ -144,9 +144,6 @@ async function onPushEvent(context: Context, benchHistory: BenchmarkHistory, cur
     throw Error(`Must not run on push event for non-default branch: ${ref.branch}`);
   }
 
-  // Persist benchmark data
-  writeBenchmarkEntry(context, benchHistory, currBench, defaultBranch);
-
   // Fetch the previous commit
   const eventData = getGithubEventData<GithubActionsEventData["push"]>();
   const baseBranchBenches = benchHistory.benchmarks[defaultBranch] || [];
@@ -161,6 +158,9 @@ async function onPushEvent(context: Context, benchHistory: BenchmarkHistory, cur
       return;
     }
   }
+
+  // Persist benchmark data (after checking if baseBranchBenches.length > 0)
+  writeBenchmarkEntry(context, benchHistory, currBench, defaultBranch);
 
   const allResultsComp = computeBenchComparision(currBench, prevBench);
   const badResultsComp = allResultsComp.filter((r) => r.ratio !== null && r.ratio > threshold);

@@ -65,7 +65,7 @@ export function readBenchmarkHistory(filepath: string): BenchmarkHistory {
     return data;
   } catch (e) {
     if (e.code === "ENOENT") {
-      console.warn(`No BenchmarkHistory file found at ${filepath}, creating a new one`, e);
+      console.warn(`No BenchmarkHistory file found at ${filepath}, creating a new one`);
       return {benchmarks: {}};
     } else {
       throw e;
