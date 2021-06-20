@@ -13,9 +13,9 @@ on:
       - main
 
 env:
-  BENCHMARK_FILES_PATH: /home/runner/work/benchmark
-  BENCHMARK_RESULTS_PATH: /home/runner/work/benchmark/results.json
-  BENCHMARK_HISTORY_PATH: /home/runner/work/benchmark/history.json
+  BENCHMARK_FILES_PATH: /home/runner/work/bench_data
+  BENCHMARK_RESULTS_PATH: /home/runner/work/bench_data/results.json
+  BENCHMARK_HISTORY_PATH: /home/runner/work/bench_data/history.json
 
 jobs:
   run:
