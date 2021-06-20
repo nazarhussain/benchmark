@@ -1,13 +1,14 @@
-import * as github from "@actions/github";
-
-/** Helper type to pass common arguments at once */
-export type Context = {
-  octokit: ReturnType<typeof github.getOctokit>;
-  repo: Required<typeof github.context.payload>["repository"];
-  refStr: string;
+export interface Opts {
+  fileGlob: string;
+  persistBranches?: string[];
+  benchmarksPerBranch?: number;
   threshold: number;
-  benchmarkHistoryPath: string;
-};
+  compare?: string;
+  prune?: boolean;
+  persist?: boolean;
+  historyLocal?: string | boolean;
+  historyGaCache?: string | boolean;
+}
 
 export type BenchmarkResults = BenchmarkResult[];
 
@@ -17,11 +18,11 @@ export type BenchmarkResult = {
   averageNs: number;
   runsDone: number;
   totalMs: number;
-  factor?: number;
 };
 
 /** Time results for a single benchmark (all items) */
 export type Benchmark = {
+  branch: string;
   commitSha: string;
   timestamp: number;
   results: BenchmarkResults;
@@ -34,11 +35,19 @@ export type BenchmarkHistory = {
   };
 };
 
-export type BenchComparision = {
+export type BenchmarkComparision = {
+  currCommitSha: string;
+  prevCommitSha: string | null;
+  someFailed: boolean;
+  results: ResultComparision[];
+};
+
+export type ResultComparision = {
   id: string;
   currAverageNs: number;
   prevAverageNs: number | null;
   ratio: number | null;
+  isFailed: boolean;
 };
 
 /** Github API type */

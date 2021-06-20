@@ -1,3 +1,14 @@
+# Testing artifacts
+test_files*
+benchmark_history.json
+
+# Build
+lib/
+
+##########
+# Defaults
+##########
+
 # Logs
 logs
 *.log

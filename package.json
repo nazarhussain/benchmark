@@ -6,6 +6,8 @@
   "author": "dapplion <35266934+dapplion@users.noreply.github.com>",
   "license": "MIT",
   "scripts": {
+    "build": "tsc",
+    "test": "mocha test/**/*.test.ts",
     "benchmark": "mocha --config ./.mocharc.perf.yaml 'test/**/*.perf.ts'",
     "run-action": "node -r ts-node/register src/githubAction/run.ts"
   },
@@ -17,6 +19,7 @@
     "typescript": "^4.3.4"
   },
   "dependencies": {
+    "@actions/cache": "^1.0.7",
     "@actions/github": "^5.0.0",
     "ajv": "^8.6.0"
   }

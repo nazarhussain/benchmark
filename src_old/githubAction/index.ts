@@ -144,23 +144,24 @@ async function onPushEvent(context: Context, benchHistory: BenchmarkHistory, cur
     throw Error(`Must not run on push event for non-default branch: ${ref.branch}`);
   }
 
+  // Persist benchmark data (after checking if baseBranchBenches.length > 0)
+  writeBenchmarkEntry(context, benchHistory, currBench, defaultBranch);
+
   // Fetch the previous commit
   const eventData = getGithubEventData<GithubActionsEventData["push"]>();
   const baseBranchBenches = benchHistory.benchmarks[defaultBranch] || [];
 
   const prevBench = baseBranchBenches.find((b) => b.commitSha === eventData.before);
   if (!prevBench) {
-    if (baseBranchBenches.length > 0) {
-      throw Error(`Previous commit not found ${eventData.before}. You must run this action with concurrency of 1`);
-    } else {
+    // <= 1 to account for the first write in writeBenchmarkEntry()
+    if (baseBranchBenches.length <= 1) {
       // Store the result and stop.
       // The first time this benchmark is ran, there won't be any prev results.
       return;
+    } else {
+      throw Error(`Previous commit not found ${eventData.before}. You must run this action with concurrency of 1`);
     }
   }
-
-  // Persist benchmark data (after checking if baseBranchBenches.length > 0)
-  writeBenchmarkEntry(context, benchHistory, currBench, defaultBranch);
 
   const allResultsComp = computeBenchComparision(currBench, prevBench);
   const badResultsComp = allResultsComp.filter((r) => r.ratio !== null && r.ratio > threshold);

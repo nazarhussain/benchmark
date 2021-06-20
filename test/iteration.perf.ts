@@ -11,10 +11,11 @@ describe("Array iteration", () => {
   setBenchOpts({
     maxMs: 60 * 1000,
     // This bench is very fast, with 1s it can do 300k runs
-    minMs: 1 * 1000,
-    runs: 1024,
+    minMs: 0.5 * 1000,
+    runs: 128,
   });
 
+  // nonce = 1
   let n = 1e6;
   const arr = Array.from({length: n}, (_, i) => i);
 

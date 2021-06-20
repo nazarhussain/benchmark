@@ -1,16 +1,15 @@
-import {Context} from "../types";
+import {getContext} from "./context";
 
 const prCommentTag = "benchmarkbot/tag";
 
-export async function commetToPrUpdatable(context: Context, prNumber: number, body: string): Promise<void> {
-  const {octokit, repo} = context;
+export async function commetToPrUpdatable(prNumber: number, body: string): Promise<void> {
+  const {repo, octokit} = getContext();
 
   // Append tag so the comment is findable latter
   const bodyWithTag = `${body}\n\n${prCommentTag}`;
 
   const comments = await octokit.rest.issues.listComments({
-    owner: repo.owner.login,
-    repo: repo.name,
+    ...repo,
     issue_number: prNumber,
   });
   const prevComment = comments.data.find((c) => c.body_text && c.body_text.includes(prCommentTag));
@@ -18,8 +17,7 @@ export async function commetToPrUpdatable(context: Context, prNumber: number, bo
   if (prevComment) {
     // Update
     await octokit.rest.issues.updateComment({
-      owner: repo.owner.login,
-      repo: repo.name,
+      ...repo,
       issue_number: prNumber,
       comment_id: prevComment.id,
       body: bodyWithTag,
@@ -27,30 +25,28 @@ export async function commetToPrUpdatable(context: Context, prNumber: number, bo
   } else {
     // Create
     await octokit.rest.issues.createComment({
-      owner: repo.owner.login,
-      repo: repo.name,
+      ...repo,
       issue_number: prNumber,
       body: bodyWithTag,
     });
   }
 }
 
-export async function commentToCommit(context: Context, commitSha: string, body: string): Promise<void> {
-  const {octokit, repo} = context;
+export async function commentToCommit(commitSha: string, body: string): Promise<void> {
+  const {repo, octokit} = getContext();
 
   await octokit.rest.repos.createCommitComment({
-    owner: repo.owner.login,
-    repo: repo.name,
+    ...repo,
     commit_sha: commitSha,
     body,
   });
 }
 
-export async function getIsDefaultBranch(context: Context): Promise<string> {
-  const {octokit, repo} = context;
+export async function getGithubDefaultBranch(): Promise<string> {
+  const {repo, octokit} = getContext();
+
   const thisRepo = await octokit.rest.repos.get({
-    owner: repo.owner.login,
-    repo: repo.name,
+    ...repo,
   });
   return thisRepo.data.default_branch;
 }

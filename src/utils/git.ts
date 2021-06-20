@@ -2,11 +2,11 @@ import {shell} from "./shell";
 
 export async function getCurrentCommitInfo(): Promise<{
   /** commit hash `71f08b12d45d44255c31f7b7d135bd15a93fdaac` */
-  sha: string;
+  commitSha: string;
   /** committer date, UNIX timestamp in seconds */
   timestamp: number;
 }> {
-  const sha = await shell("git show -s --format=%H");
+  const commitSha = await shell("git show -s --format=%H");
   const timestampStr = await shell("git show -s --format=%ct");
   const timestamp = parseInt(timestampStr, 10);
 
@@ -15,7 +15,7 @@ export async function getCurrentCommitInfo(): Promise<{
   }
 
   return {
-    sha,
+    commitSha,
     timestamp,
   };
 }

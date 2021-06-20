@@ -1,42 +1,40 @@
-import {BenchComparision} from "../types";
+import {BenchmarkComparision, ResultComparision} from "../types";
 
-export function renderComment(
-  allResultsComp: BenchComparision[],
-  badResultsComp: BenchComparision[],
-  commitsSha: {curr: string; prev: string},
-  threshold: number
-): string {
-  const topSection =
-    badResultsComp.length > 0
-      ? // If there was any bad benchmark print a table only with the bad results
-        `# :warning: **Performance Alert** :warning:
+type CommitsSha = Pick<BenchmarkComparision, "currCommitSha" | "prevCommitSha">;
+
+export function renderComment(benchComp: BenchmarkComparision): string {
+  const badbenchComp = benchComp.results.filter((r) => r.isFailed);
+
+  const topSection = benchComp.someFailed
+    ? // If there was any bad benchmark print a table only with the bad results
+      `# :warning: **Performance Alert** :warning:
 
 Possible performance regression was detected for some benchmarks.
-Benchmark result of this commit is worse than the previous benchmark result exceeding threshold \`${threshold}\`.
+Benchmark result of this commit is worse than the previous benchmark result exceeding threshold.
   
-${renderBenchmarkTable(commitsSha, badResultsComp)}
+${renderBenchmarkTable(badbenchComp, benchComp)}
 `
-      : // Otherwise, just add a title
-        "# Performance Report";
+    : // Otherwise, just add a title
+      "# Performance Report";
 
   // For all cases attach the full benchmarks
   return `${topSection}
 
 <details>
 
-${renderBenchmarkTable(commitsSha, allResultsComp)}
+${renderBenchmarkTable(benchComp.results, benchComp)}
 
 </details>
 `;
 }
 
-function renderBenchmarkTable(commitsSha: {curr: string; prev: string}, resultsComp: BenchComparision[]) {
+function renderBenchmarkTable(benchComp: ResultComparision[], {currCommitSha, prevCommitSha}: CommitsSha) {
   function toRow(arr: (number | string)[]): string {
     const row = arr.map((e) => `\`${e}\``).join(" | ");
     return `| ${row} |`;
   }
 
-  const rows = resultsComp.map((result) => {
+  const rows = benchComp.map((result) => {
     const {id, prevAverageNs, currAverageNs, ratio} = result;
 
     if (prevAverageNs != undefined && ratio != undefined) {
@@ -46,7 +44,7 @@ function renderBenchmarkTable(commitsSha: {curr: string; prev: string}, resultsC
     }
   });
 
-  return `| Benchmark suite | Previous: ${commitsSha.prev} | Current: ${commitsSha.curr} | Ratio |
+  return `| Benchmark suite | Previous: ${prevCommitSha} | Current: ${currCommitSha} | Ratio |
 |-|-|-|-|
 ${rows.join("\n")}
 `;

@@ -21,54 +21,25 @@ export type BenchmarkResult = {
   averageNs: number;
   runsDone: number;
   totalMs: number;
-  factor?: number;
+};
+
+export type BenchmarkResultCompared = BenchmarkResult & {
+  ratio: number | null;
+  isFailed: boolean;
+  isBetter: boolean;
 };
 
 export type BenchmarkResultDetail = {
   runsNs: bigint[];
 };
 
-export async function doRun<T>(opts: BenchmarkRunOptsWithFn<T>): Promise<{result: BenchmarkResult; runsNs: bigint[]}> {
-  const runs = opts.runs || 512;
-  const maxMs = opts.maxMs || 2000;
-  const minMs = opts.minMs || 100;
+export function formatResultRow(
+  result: BenchmarkResult,
+  prevResult: BenchmarkResult | null,
+  threshold: number
+): string {
+  const {id, averageNs, runsDone, totalMs} = result;
 
-  const runsNs: bigint[] = [];
-
-  const startRunMs = Date.now();
-  let i = 0;
-  // eslint-disable-next-line no-constant-condition
-  while (true) {
-    const ellapsedMs = Date.now() - startRunMs;
-    // Exceeds time limit, stop
-    if (ellapsedMs > maxMs) break;
-    // Exceeds target runs + min time
-    if (i++ >= runs && ellapsedMs > minMs) break;
-
-    const input = opts.beforeEach ? await opts.beforeEach(i) : (undefined as unknown as T);
-
-    const startNs = process.hrtime.bigint();
-    await opts.fn(input);
-    const endNs = process.hrtime.bigint();
-
-    runsNs.push(endNs - startNs);
-  }
-
-  const average = averageBigint(runsNs);
-  const averageNs = Number(average);
-
-  return {
-    result: {id: opts.id, averageNs, runsDone: i - 1, totalMs: Date.now() - startRunMs},
-    runsNs,
-  };
-}
-
-function averageBigint(arr: bigint[]): bigint {
-  const total = arr.reduce((total, value) => total + value);
-  return total / BigInt(arr.length);
-}
-
-export function formatResultRow({id, averageNs, runsDone, factor, totalMs}: BenchmarkResult): string {
   const precision = 7;
   const idLen = 64;
 
@@ -78,11 +49,13 @@ export function formatResultRow({id, averageNs, runsDone, factor, totalMs}: Benc
   // Scalar multiplication G1 (255-bit, constant-time)                              7219.330 ops/s       138517 ns/op
   // Scalar multiplication G2 (255-bit, constant-time)                              3133.117 ops/s       319171 ns/op
 
+  const ratio = prevResult ? result.averageNs / prevResult.averageNs : null;
+
   const [averageTime, timeUnit] = prettyTime(averageNs);
   const row = [
-    factor === undefined ? "" : `x${factor.toFixed(2)}`.padStart(6),
     `${opsPerSec.toPrecision(precision).padStart(11)} ops/s`,
     `${averageTime.toPrecision(precision).padStart(11)} ${timeUnit}/op`,
+    getRatioRow(result, prevResult, threshold),
     `${String(runsDone).padStart(10)} runs`,
     `${(totalMs / 1000).toPrecision(3).padStart(6)} s`,
   ].join(" ");
@@ -90,10 +63,22 @@ export function formatResultRow({id, averageNs, runsDone, factor, totalMs}: Benc
   return id.slice(0, idLen).padEnd(idLen) + " " + row;
 }
 
-export function formatTitle(title: string): string {
-  return `
-${title}
-${"=".repeat(64)}`;
+function getRatioRow(result: BenchmarkResult, prevResult: BenchmarkResult | null, threshold: number): string {
+  if (prevResult === null) {
+    return "-".padStart(8);
+  }
+
+  const ratio = result.averageNs / prevResult.averageNs;
+
+  const str = `x${ratio.toFixed(3)}`.padStart(8);
+
+  if (ratio > threshold) {
+    return `\u001b[91m${str}\u001b[0m`; // red
+  } else if (ratio < 1 / threshold) {
+    return `\u001b[92m${str}\u001b[0m`; // green
+  } else {
+    return str;
+  }
 }
 
 function prettyTime(nanoSec: number): [number, string] {
