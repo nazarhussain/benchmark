@@ -52,10 +52,7 @@ jobs:
 
       # Run `github-action-benchmark` action
       - name: Store benchmark result
-        run: |
-          cd .github/workflows/benchmark
-          yarn
-          yarn run-action
+        run: yarn run-action
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BENCHMARK_RESULTS_PATH: ${{env.BENCHMARK_RESULTS_PATH}}

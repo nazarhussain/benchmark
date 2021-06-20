@@ -6,7 +6,8 @@
   "author": "dapplion <35266934+dapplion@users.noreply.github.com>",
   "license": "MIT",
   "scripts": {
-    "benchmark": "mocha --config ./.mocharc.perf.yaml 'test/**/*.perf.ts'"
+    "benchmark": "mocha --config ./.mocharc.perf.yaml 'test/**/*.perf.ts'",
+    "run-action": "node -r ts-node/register src/githubAction/run.ts"
   },
   "devDependencies": {
     "@types/mocha": "^8.2.2",

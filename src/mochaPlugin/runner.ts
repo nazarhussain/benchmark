@@ -43,9 +43,9 @@ export async function doRun<T>(opts: BenchmarkRunOptsWithFn<T>): Promise<{result
     // Exceeds time limit, stop
     if (ellapsedMs > maxMs) break;
     // Exceeds target runs + min time
-    if (i++ > runs && ellapsedMs > minMs) break;
+    if (i++ >= runs && ellapsedMs > minMs) break;
 
-    const input = opts.beforeEach ? await opts.beforeEach(i) : ((undefined as unknown) as T);
+    const input = opts.beforeEach ? await opts.beforeEach(i) : (undefined as unknown as T);
 
     const startNs = process.hrtime.bigint();
     await opts.fn(input);
@@ -88,20 +88,6 @@ export function formatResultRow({id, averageNs, runsDone, factor, totalMs}: Benc
   ].join(" ");
 
   return id.slice(0, idLen).padEnd(idLen) + " " + row;
-}
-
-/**
- * Return results in benckmark.js output format
- * ```
- * fib(10) x 1,431,759 ops/sec ±0.74% (93 runs sampled)
- * ```
- */
-function formatAsBenchmarkJs(results: BenchmarkResult[]): string {
-  return (
-    results
-      .map(({id, averageNs, runsDone}) => `${id} x ${1e9 / averageNs} ops/sec ±0.00% (${runsDone} runs sampled)`)
-      .join("\n") + "\n"
-  );
 }
 
 export function formatTitle(title: string): string {
