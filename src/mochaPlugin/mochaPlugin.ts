@@ -76,9 +76,8 @@ export function itBench<T>(
 
     // Store temp results for the custom reporter
     const test = this.currentTest ?? this.test;
-    if (test) {
-      testResults.set(test, result);
-    }
+    if (!test) throw Error("this context has not 'test' object");
+    testResults.set(test, result);
 
     // Persist full results if requested. dir is created in `beforeAll`
     if (benchmarkResultsCsvDir) {
