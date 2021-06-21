@@ -8,7 +8,7 @@
   "scripts": {
     "build": "tsc",
     "test": "mocha test/**/*.test.ts",
-    "benchmark": "node lib/cli.ts 'test/**/*.perf.ts'"
+    "benchmark": "node -r ts-node/register src/cli.ts 'test/**/*.perf.ts'"
   },
   "devDependencies": {
     "@types/mocha": "^8.2.2",

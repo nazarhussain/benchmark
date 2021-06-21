@@ -13,7 +13,7 @@ jobs:
         with:
           node-version: "14.16.0"
       - name: Install
-        run: yarn install --frozen-lockfile --ignore-optional
+        run: yarn install --frozen-lockfile
       # </common-build>
       - name: Build
         run: yarn build
