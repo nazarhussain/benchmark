@@ -1,7 +1,7 @@
 // Must not use `* as yargs`, see https://github.com/yargs/yargs/issues/1131
 import yargs from "yargs";
 import {loadOptions} from "./utils/mochaCliExports";
-import {options} from "./options";
+import {options, optionsDefault} from "./options";
 import {run} from "./run";
 import {Opts} from "./types";
 
@@ -19,12 +19,7 @@ yargs
   .command({
     command: ["$0 [spec..]", "inspect"],
     describe: "Run benchmarks",
-    handler: (argv) => {
-      run({
-        threshold: 2,
-        ...argv,
-      } as Opts);
-    },
+    handler: (argv) => run({threshold: optionsDefault.threshold, ...argv} as Opts),
   })
 
   .parserConfiguration({

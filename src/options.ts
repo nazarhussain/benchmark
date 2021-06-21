@@ -2,6 +2,12 @@ import {Options} from "yargs";
 import {Opts} from "./types";
 import {FileCollectionOptions} from "./utils/mochaCliExports";
 
+export const optionsDefault = {
+  threshold: 2,
+  historyLocalPath: "./benchmark_history.json",
+  historyCacheKey: "benchmark_history",
+};
+
 type ICliCommandOptions<OwnArgs> = Required<{[key in keyof OwnArgs]: Options}>;
 type CliOpts = Omit<Opts, "fileGlob" | keyof FileCollectionOptions>;
 
@@ -19,7 +25,7 @@ export const options: ICliCommandOptions<CliOpts> = {
   threshold: {
     description: "Ratio of new average time per run vs previos time per run to consider a failure",
     type: "number",
-    default: 2,
+    default: optionsDefault.threshold,
   },
   compare: {
     description:
@@ -41,11 +47,13 @@ export const options: ICliCommandOptions<CliOpts> = {
     description:
       "Persist benchmark history locally. May specify just a boolean to use a default path, or provide a path",
     type: "string",
+    defaultDescription: optionsDefault.historyLocalPath,
   },
   historyGaCache: {
     alias: ["ga-cache"],
     description:
       "Persist benchmark history in Github Actions cache. Requires Github authentication. May specify just a boolean to use a default cache key or provide a custom key",
     type: "string",
+    defaultDescription: optionsDefault.historyCacheKey,
   },
 };
