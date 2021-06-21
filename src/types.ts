@@ -1,5 +1,6 @@
-export interface Opts {
-  fileGlob: string;
+import {FileCollectionOptions} from "./utils/mochaCliExports";
+
+export type Opts = Partial<FileCollectionOptions> & {
   persistBranches?: string[];
   benchmarksPerBranch?: number;
   threshold: number;
@@ -8,7 +9,7 @@ export interface Opts {
   persist?: boolean;
   historyLocal?: string | boolean;
   historyGaCache?: string | boolean;
-}
+};
 
 export type BenchmarkResults = BenchmarkResult[];
 

@@ -118,8 +118,8 @@ Ratio of new average time per run vs previos time per run to consider a failure.
 
 Manually specify how to select the previous benchmark to compare against. May specify:
 
-- Branch: Will pick the latest commit from that branch
-- Commit hash
+1. Branch: Will pick the latest commit from that branch
+2. Commit hash
 
 ---
 

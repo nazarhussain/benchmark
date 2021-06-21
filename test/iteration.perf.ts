@@ -1,4 +1,4 @@
-import {itBench, setBenchOpts} from "../src/mochaPlugin/mochaPlugin";
+import {itBench, setBenchOpts} from "../src";
 
 // As of Jun 17 2021
 // Compare state root

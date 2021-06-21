@@ -1,7 +1,7 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import Mocha from "mocha";
 import {Benchmark, BenchmarkResult} from "../types";
-import {testResults} from ".";
+import {testResults} from "./globalState";
 import {formatResultRow} from "./format";
 
 const {
