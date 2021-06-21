@@ -3,7 +3,14 @@ import {BenchmarkHistory} from "../../src/types";
 import {fetchGaCache, writeGaCache} from "../../src/history/gaCache";
 import {isGaRun} from "../../src/github/context";
 
-describe("benchmark history gaCache", function () {
+// Currently fails with
+//
+// Error: reserveCache failed: Cache Service Url not found, unable to restore cache
+//
+// See:
+//  - https://github.com/nektos/act/issues/329
+//  - https://github.com/nektos/act/issues/285
+describe.skip("benchmark history gaCache", function () {
   this.timeout(60 * 1000);
 
   const cacheKey = "ga-cache-testing";
