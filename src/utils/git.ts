@@ -41,6 +41,6 @@ export async function getBranchCommitList(branch: string, n = 50): Promise<strin
  * Resolve a heads ref
  */
 export async function getBranchLatestCommit(branch: string): Promise<string> {
-  const res = await shell(`git rev-parse ${branch}`);
+  const res = await shell(`git rev-parse refs/heads/${branch}`);
   return res.trim();
 }
