@@ -81,18 +81,14 @@ export async function resolveCompareWith(opts: Opts): Promise<CompareWith> {
     switch (github.context.eventName) {
       case "pull_request": {
         const eventData = getGithubEventData<GithubActionsEventData["pull_request"]>();
-        console.log(eventData);
-
         const baseRef = eventData.pull_request.base.ref;
         const baseBranch = parseBranchFromRef(baseRef);
         return {type: CompareWithType.latestCommitInBranch, branch: baseBranch};
       }
 
       case "push": {
-        const eventData = getGithubEventData<GithubActionsEventData["push"]>();
-        console.log(eventData);
-
         const branch = parseBranchFromRef(github.context.ref);
+        const eventData = getGithubEventData<GithubActionsEventData["push"]>();
         return {type: CompareWithType.latestCommitInBranch, branch: branch, before: eventData.before};
       }
 
