@@ -22,7 +22,12 @@ export class LocalHistoryProvider implements IHistoryProvider {
   constructor(private readonly dirpath: string) {}
 
   async listCommits(): Promise<string[]> {
-    return fs.readdirSync(this.dirpath);
+    try {
+      return fs.readdirSync(this.dirpath);
+    } catch (e) {
+      if (e.code === "ENOENT") return [];
+      else throw e;
+    }
   }
 
   async readCommit(commitSha: string): Promise<Benchmark | null> {
