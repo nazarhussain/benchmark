@@ -18,6 +18,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+        with:
+          # Get the entire git history to walk commit history on head branch
+          fetch-depth: 0
+          # Do not checkout merge commit
+          ref: ${{ github.event.pull_request.head.sha }}
+
       - uses: actions/setup-node@v2-beta
         with:
           node-version: "14.16.0"
