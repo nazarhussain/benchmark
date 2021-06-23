@@ -1,44 +1,53 @@
 import fs from "fs";
-import path from "path";
 import * as cache from "@actions/cache";
-import {BenchmarkHistory} from "../types";
-import {emptyBenchmarkHistory} from "./schema";
-import {readLocalHistory, writeLocalHistory} from "./local";
+import {Benchmark} from "../types";
+import {LocalHistoryProvider} from "./local";
+import {IHistoryProvider} from "./provider";
 
-export async function fetchGaCache(key: string): Promise<BenchmarkHistory> {
+/**
+ * Persist results in CSV, one benchmark result per file
+ *
+ * ```
+ * /$dirpath/52b8122daa9b7a3d0ea0ecfc1ff9eda79a201eb8.csv
+ * ```
+ *
+ * ```csv
+ * id,averageNs,runsDone,totalMs
+ * sum array with raw for loop,1348118,371,501
+ * sum array with reduce,16896469,128,2163
+ * ```
+ */
+export function getGaCacheHistoryProvider(cacheKey: string): IHistoryProvider {
   const tmpDir = fs.mkdtempSync("ga-cache-download");
-  try {
-    const cacheKey = await cache.restoreCache([tmpDir], key);
-    if (!cacheKey) {
-      // Cache not found
-      return emptyBenchmarkHistory;
-    }
-
-    const files = fs.readdirSync(tmpDir);
-    if (files.length > 1) {
-      throw Error(`More than one file downloaded from cache\n${files.join(", ")}`);
-    }
-
-    const [file] = files;
-    if (!file) {
-      // Empty cache
-      return emptyBenchmarkHistory;
-    }
-
-    const filepath = path.join(tmpDir, file);
-    return readLocalHistory(filepath);
-  } finally {
-    fs.rmSync(tmpDir, {recursive: true, force: true});
-  }
+  return new GaCacheHistoryProvider(tmpDir, cacheKey);
 }
 
-export async function writeGaCache(key: string, history: BenchmarkHistory): Promise<void> {
-  const tmpDir = fs.mkdtempSync("ga-cache-upload");
-  try {
-    const filepath = path.join(tmpDir, "benchmark_history.json");
-    writeLocalHistory(filepath, history);
-    await cache.saveCache([tmpDir], key);
-  } finally {
-    fs.rmSync(tmpDir, {recursive: true, force: true});
+export class GaCacheHistoryProvider extends LocalHistoryProvider implements IHistoryProvider {
+  private initializePromise: Promise<any> | null = null;
+
+  constructor(private readonly tmpDir: string, private readonly cacheKey: string) {
+    super(tmpDir);
+  }
+
+  async listCommits(): Promise<string[]> {
+    await this.initialize();
+    return super.listCommits();
+  }
+
+  async readCommit(commitSha: string): Promise<Benchmark | null> {
+    await this.initialize();
+    return super.readCommit(commitSha);
+  }
+
+  async writeCommit(commitSha: string, data: Benchmark): Promise<void> {
+    await super.writeCommit(commitSha, data);
+    await cache.saveCache([this.tmpDir], this.cacheKey);
+  }
+
+  private async initialize(): Promise<void> {
+    if (this.initializePromise === null) {
+      this.initializePromise = cache.restoreCache([this.tmpDir], this.cacheKey);
+    }
+    return this.initializePromise;
   }
 }

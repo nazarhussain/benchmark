@@ -1,26 +1,79 @@
 import * as github from "@actions/github";
 import {Benchmark, BenchmarkHistory, Opts} from "../types";
-import {getGithubEventData, GithubActionsEventData, parseBranchFromRef, getDefaultBranch} from "../utils";
+import {
+  getGithubEventData,
+  GithubActionsEventData,
+  parseBranchFromRef,
+  getDefaultBranch,
+  getBranchLatestCommit,
+  getBranchCommitList,
+} from "../utils";
 import {isGaRun} from "../github/context";
+import {IHistoryProvider} from "../history/provider";
+import {validateBenchmarkResults} from "../history/schema";
 
-export async function resolveCompare(history: BenchmarkHistory, opts: Opts): Promise<Benchmark | null> {
-  // compare may be a branch or commit
-  if (opts.compare) {
-    // If compare is a branch
-    const branchBenchmarks = history.benchmarks[opts.compare];
-    if (branchBenchmarks) {
-      // TODO: Return latest based on time, git history or ordering?
-      return getLatestBenchmarkInBranch(branchBenchmarks);
-    }
+/** Number of commits to consider when finding benchmark data on a branch */
+const COMMIT_COUNT_LOOKBACK = 100;
 
-    for (const benchmarks of Object.values(history.benchmarks)) {
-      const benchmark = benchmarks.find((b) => b.commitSha === opts.compare);
-      if (benchmark) {
-        return benchmark;
+enum CompareWithType {
+  latestCommitInBranch = "latestCommitInBranch",
+  exactCommit = "exactCommit",
+}
+
+export type CompareWith =
+  | {type: CompareWithType.latestCommitInBranch; branch: string; before?: string}
+  | {type: CompareWithType.exactCommit; commitSha: string};
+
+export async function resolveCompare(provider: IHistoryProvider, opts: Opts): Promise<Benchmark | null> {
+  const compareWith = await resolveCompareWith(opts);
+  const prevBench = await resolvePrevBenchmark(compareWith, provider);
+
+  if (!prevBench) return null;
+
+  validateBenchmarkResults(prevBench.results);
+
+  return prevBench;
+}
+
+export async function resolvePrevBenchmark(
+  compareWith: CompareWith,
+  provider: IHistoryProvider
+): Promise<Benchmark | null> {
+  switch (compareWith.type) {
+    case CompareWithType.exactCommit:
+      return await provider.readCommit(compareWith.commitSha);
+
+    case CompareWithType.latestCommitInBranch: {
+      // Try first latest commit in branch
+      const latestCommitSha = await getBranchLatestCommit(compareWith.branch);
+      const latestCommit = await provider.readCommit(latestCommitSha);
+      if (latestCommit) return latestCommit;
+
+      // List some commits in branch and look for matches
+      const branchCommits = await getBranchCommitList(compareWith.branch, COMMIT_COUNT_LOOKBACK);
+      const commitsWithBenchArr = await provider.listCommits();
+      const commitsWithBenchSet = new Set(commitsWithBenchArr);
+      for (const commitSha of branchCommits) {
+        if (commitsWithBenchSet.has(commitSha)) {
+          return await provider.readCommit(commitSha);
+        }
       }
-    }
 
-    throw Error(`No benchmark found for branch or commit ${opts.compare}`);
+      // TODO: Try something else?
+
+      return null;
+    }
+  }
+}
+
+export async function resolveCompareWith(opts: Opts): Promise<CompareWith> {
+  // compare may be a branch or commit
+  if (opts.compareBranch) {
+    return {type: CompareWithType.latestCommitInBranch, branch: opts.compareBranch};
+  }
+
+  if (opts.compareCommit) {
+    return {type: CompareWithType.exactCommit, commitSha: opts.compareCommit};
   }
 
   // In GA CI figure out what to compare against with github actions events
@@ -28,20 +81,15 @@ export async function resolveCompare(history: BenchmarkHistory, opts: Opts): Pro
     switch (github.context.eventName) {
       case "pull_request": {
         const eventData = getGithubEventData<GithubActionsEventData["pull_request"]>();
-        // TODO: parse ref to be `/refs/heads/$branch`
-        const baseBranch = eventData.pull_request.base.ref;
-        return getLatestBenchmarkInBranch(history.benchmarks[baseBranch] ?? []);
+        const baseRef = eventData.pull_request.base.ref;
+        const baseBranch = parseBranchFromRef(baseRef);
+        return {type: CompareWithType.latestCommitInBranch, branch: baseBranch};
       }
 
       case "push": {
         const branch = parseBranchFromRef(github.context.ref);
         const eventData = getGithubEventData<GithubActionsEventData["push"]>();
-
-        // Return commit sha of the previous commit if available
-        const branchBenchmarks = history.benchmarks[branch] || [];
-        const prevCommitBench = branchBenchmarks.find((b) => b.commitSha === eventData.before);
-
-        return prevCommitBench || getLatestBenchmarkInBranch(branchBenchmarks);
+        return {type: CompareWithType.latestCommitInBranch, branch: branch, before: eventData.before};
       }
 
       default:
@@ -51,10 +99,5 @@ export async function resolveCompare(history: BenchmarkHistory, opts: Opts): Pro
 
   // Otherwise compare against the default branch
   const defaultBranch = await getDefaultBranch();
-  return getLatestBenchmarkInBranch(history.benchmarks[defaultBranch] || []);
-}
-
-function getLatestBenchmarkInBranch(benchmarks: Benchmark[]): Benchmark | null {
-  // TODO: Return latest based on time, git history or ordering?
-  return benchmarks[benchmarks.length - 1] ?? null;
+  return {type: CompareWithType.latestCommitInBranch, branch: defaultBranch};
 }

@@ -1,5 +1,5 @@
 import Ajv from "ajv";
-import {BenchmarkHistory} from "../types";
+import {BenchmarkHistory, BenchmarkResults} from "../types";
 
 export const emptyBenchmarkHistory: BenchmarkHistory = {benchmarks: {}};
 
@@ -49,6 +49,12 @@ const benchmarkHistorySchema = {
   },
   required: ["benchmarks"],
 };
+
+export function validateBenchmarkResults(data: BenchmarkResults): void {
+  const validate = ajv.compile(benchmarkResultsSchema);
+  const valid = validate(data);
+  if (!valid) throw Error(`Invalid BenchmarkResults ${JSON.stringify(validate.errors, null, 2)}`);
+}
 
 export function validateHistory(history: BenchmarkHistory): void {
   const validate = ajv.compile(benchmarkHistorySchema);

@@ -1,5 +1,6 @@
 import fs from "fs";
-import path from "path";
+import csvParse from "csv-parse/lib/sync";
+import csvStringify from "csv-stringify/lib/sync";
 
 export function readJson<T>(filepath: string): T {
   const jsonStr = fs.readFileSync(filepath, "utf8");
@@ -17,8 +18,24 @@ export function readJson<T>(filepath: string): T {
 }
 
 export function writeJson<T>(filepath: string, json: T): void {
-  fs.mkdirSync(path.dirname(filepath), {recursive: true});
-
   const jsonStr = JSON.stringify(json, null, 2);
   fs.writeFileSync(filepath, jsonStr);
+}
+
+export function fromCsv<T extends any[]>(str: string): T {
+  return csvParse(str);
+}
+
+export function toCsv<T extends any[]>(data: T): string {
+  return csvStringify(data);
+}
+
+export function readCsv<T extends any[]>(filepath: string): T {
+  const str = fs.readFileSync(filepath, "utf8");
+  return fromCsv(str);
+}
+
+export function writeCsv<T extends any[]>(filepath: string, data: T): void {
+  const str = toCsv(data);
+  fs.writeFileSync(filepath, str);
 }

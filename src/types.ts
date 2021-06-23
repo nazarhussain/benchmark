@@ -4,11 +4,13 @@ export type Opts = Partial<FileCollectionOptions> & {
   persistBranches?: string[];
   benchmarksPerBranch?: number;
   threshold: number;
-  compare?: string;
+  compareBranch?: string;
+  compareCommit?: string;
   prune?: boolean;
   persist?: boolean;
   historyLocal?: string | boolean;
   historyGaCache?: string | boolean;
+  historyS3?: boolean;
 };
 
 export type BenchmarkResults = BenchmarkResult[];
@@ -23,9 +25,7 @@ export type BenchmarkResult = {
 
 /** Time results for a single benchmark (all items) */
 export type Benchmark = {
-  branch: string;
   commitSha: string;
-  timestamp: number;
   results: BenchmarkResults;
 };
 

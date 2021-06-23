@@ -4,7 +4,7 @@ import {FileCollectionOptions} from "./utils/mochaCliExports";
 
 export const optionsDefault = {
   threshold: 2,
-  historyLocalPath: "./benchmark_history.json",
+  historyLocalPath: "./benchmark_history",
   historyCacheKey: "benchmark_history",
 };
 
@@ -27,11 +27,14 @@ export const options: ICliCommandOptions<CliOpts> = {
     type: "number",
     default: optionsDefault.threshold,
   },
-  compare: {
-    description:
-      "Manually specify how to select the previous benchmark to compare against. May specify (1) Branch: Will pick the latest commit from that branch (2) Commit hash",
+  compareBranch: {
+    description: "Compare new benchmark data against the latest available benchmark in this branch",
     type: "string",
     defaultDescription: "default-branch",
+  },
+  compareCommit: {
+    description: "Compare new benchmark data against the benchmark data associated with a specific commit",
+    type: "string",
   },
   prune: {
     description:
@@ -55,5 +58,10 @@ export const options: ICliCommandOptions<CliOpts> = {
       "Persist benchmark history in Github Actions cache. Requires Github authentication. May specify just a boolean to use a default cache key or provide a custom key",
     type: "string",
     defaultDescription: optionsDefault.historyCacheKey,
+  },
+  historyS3: {
+    alias: ["s3"],
+    description: "Persist benchmark history in an Amazon S3 bucket. Requires Github authentication",
+    type: "string",
   },
 };
