@@ -34,3 +34,5 @@ jobs:
       # Run benchmark with custom tooling and stores the output to a file
       - name: Run performance tests
         run: yarn benchmark --local ./cache
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
