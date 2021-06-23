@@ -33,6 +33,8 @@ export async function getCurrentCommitInfo(): Promise<{
  * The output is given in reverse chronological order by default.
  */
 export async function getBranchCommitList(branch: string, n = 50): Promise<string[]> {
+  await ensureBranchExists(branch);
+
   const commitsStr = await shell(`git --no-pager log --format=format:%H -n ${n} ${branch}`);
   return commitsStr.trim().split("\n");
 }
@@ -41,6 +43,22 @@ export async function getBranchCommitList(branch: string, n = 50): Promise<strin
  * Resolve a heads ref
  */
 export async function getBranchLatestCommit(branch: string): Promise<string> {
+  await ensureBranchExists(branch);
+
   const res = await shell(`git rev-parse refs/heads/${branch}`);
   return res.trim();
+}
+
+/**
+ * Ensure branch exists locally or try to fetch it from origin
+ */
+async function ensureBranchExists(branch: string): Promise<void> {
+  const refExists = await shell(`git show-ref --verify --quiet refs/heads/${branch}`).then(
+    () => true,
+    () => false
+  );
+
+  if (!refExists) {
+    await shell(`git fetch origin ${branch}`);
+  }
 }
