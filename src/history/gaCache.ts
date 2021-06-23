@@ -22,7 +22,7 @@ export function getGaCacheHistoryProvider(cacheKey: string): IHistoryProvider {
   return new GaCacheHistoryProvider(tmpDir, cacheKey);
 }
 
-export class GaCacheHistoryProvider extends LocalHistoryProvider implements IHistoryProvider {
+class GaCacheHistoryProvider extends LocalHistoryProvider implements IHistoryProvider {
   private initializePromise: Promise<any> | null = null;
 
   constructor(private readonly tmpDir: string, private readonly cacheKey: string) {
@@ -39,8 +39,8 @@ export class GaCacheHistoryProvider extends LocalHistoryProvider implements IHis
     return super.readCommit(commitSha);
   }
 
-  async writeCommit(commitSha: string, data: Benchmark): Promise<void> {
-    await super.writeCommit(commitSha, data);
+  async writeCommit(data: Benchmark): Promise<void> {
+    await super.writeCommit(data);
     await cache.saveCache([this.tmpDir], this.cacheKey);
   }
 

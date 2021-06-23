@@ -1,36 +1,29 @@
-import assert from "assert";
 import fs from "fs";
-import path from "path";
-import {BenchmarkHistory} from "../../src/types";
-import {readLocalHistory, writeLocalHistory} from "../../src/history/local";
+import {expect} from "chai";
+import rimraf from "rimraf";
+import {Benchmark} from "../../src/types";
+import {LocalHistoryProvider} from "../../src/history/local";
 
 describe("benchmark history local", () => {
   const testDir = fs.mkdtempSync("test_files_");
+  const historyProvider = new LocalHistoryProvider(testDir);
 
-  const history: BenchmarkHistory = {
-    benchmarks: {
-      main: [
-        {
-          branch: "main",
-          commitSha: "010101010101010101010101",
-          timestamp: 1600000000,
-          results: [{id: "for loop", averageNs: 16573, runsDone: 1024, totalMs: 465}],
-        },
-      ],
-      fix1: [],
-    },
+  const benchmark: Benchmark = {
+    commitSha: "010101010101010101010101",
+    results: [{id: "for loop", averageNs: 16573, runsDone: 1024, totalMs: 465}],
   };
 
   after(() => {
-    fs.rmdirSync(testDir, {recursive: true});
+    rimraf.sync(testDir);
   });
 
-  it("Should write and read history file", () => {
-    const filepath = path.join(testDir, "benchmark_history.json");
+  it("Should write and read history file", async () => {
+    await historyProvider.writeCommit(benchmark);
 
-    writeLocalHistory(filepath, history);
-    const historyRead = readLocalHistory(filepath);
+    const commits = await historyProvider.listCommits();
+    expect(commits).to.deep.equal([benchmark.commitSha], "Wrong commit list");
 
-    assert.deepStrictEqual(historyRead, history, "Wrong history read from disk");
+    const benchRead = await historyProvider.readCommit(benchmark.commitSha);
+    expect(benchRead).to.deep.equal(benchmark, "Wrong bench read from disk");
   });
 });

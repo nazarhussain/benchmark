@@ -53,7 +53,10 @@ const benchmarkHistorySchema = {
 export function validateBenchmarkResults(data: BenchmarkResults): void {
   const validate = ajv.compile(benchmarkResultsSchema);
   const valid = validate(data);
-  if (!valid) throw Error(`Invalid BenchmarkResults ${JSON.stringify(validate.errors, null, 2)}`);
+  if (!valid) {
+    console.log(data);
+    throw Error(`Invalid BenchmarkResults ${JSON.stringify(validate.errors, null, 2)}`);
+  }
 }
 
 export function validateHistory(history: BenchmarkHistory): void {

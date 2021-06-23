@@ -1,9 +1,9 @@
-import {Benchmark, BenchmarkHistory, Opts} from "../types";
+import {Benchmark} from "../types";
 
 export interface IHistoryProvider {
   listCommits(): Promise<string[]>;
   readCommit(commitSha: string): Promise<Benchmark | null>;
-  writeCommit(commitSha: string, data: Benchmark): Promise<void>;
+  writeCommit(data: Benchmark): Promise<void>;
 }
 
 /**

@@ -1,9 +1,10 @@
 import fs from "fs";
 import path from "path";
 import {IHistoryProvider} from "./provider";
-import {Benchmark, BenchmarkHistory, BenchmarkResult, BenchmarkResults} from "../types";
-import {readCsv, readJson, writeCsv, writeJson} from "../utils/file";
-import {emptyBenchmarkHistory, validateHistory} from "./schema";
+import {Benchmark, BenchmarkResults} from "../types";
+import {readCsv, writeCsv} from "../utils/file";
+
+const extension = ".csv";
 
 /**
  * Persist results in CSV, one benchmark result per file
@@ -23,7 +24,10 @@ export class LocalHistoryProvider implements IHistoryProvider {
 
   async listCommits(): Promise<string[]> {
     try {
-      return fs.readdirSync(this.dirpath);
+      return fs.readdirSync(this.dirpath).map((file) => {
+        if (file.endsWith(extension)) return file.slice(0, -extension.length);
+        else return file;
+      });
     } catch (e) {
       if (e.code === "ENOENT") return [];
       else throw e;
@@ -40,32 +44,12 @@ export class LocalHistoryProvider implements IHistoryProvider {
     }
   }
 
-  async writeCommit(commitSha: string, data: Benchmark): Promise<void> {
-    if (commitSha !== data.commitSha) throw Error("commitSha doesn't match");
+  async writeCommit(data: Benchmark): Promise<void> {
     fs.mkdirSync(this.dirpath, {recursive: true});
     writeCsv<BenchmarkResults>(this.getFilepath(data.commitSha), data.results);
   }
 
   private getFilepath(commitSha: string): string {
-    return path.join(this.dirpath, commitSha) + ".csv";
+    return path.join(this.dirpath, commitSha) + extension;
   }
-}
-
-export function readLocalHistory(filepath: string): BenchmarkHistory {
-  try {
-    const data = readJson<BenchmarkHistory>(filepath);
-    validateHistory(data);
-    return data;
-  } catch (e) {
-    if (e.code === "ENOENT") {
-      console.warn(`No BenchmarkHistory file found at ${filepath}, creating a new one`);
-      return emptyBenchmarkHistory;
-    } else {
-      throw e;
-    }
-  }
-}
-
-export function writeLocalHistory(filepath: string, data: BenchmarkHistory): void {
-  writeJson(filepath, data);
 }

@@ -43,14 +43,13 @@ export class S3HistoryProvider implements IHistoryProvider {
     return {commitSha, results};
   }
 
-  async writeCommit(commitSha: string, data: Benchmark): Promise<void> {
-    if (commitSha !== data.commitSha) throw Error("commitSha doesn't match");
+  async writeCommit(data: Benchmark): Promise<void> {
     const body = toCsv<BenchmarkResults>(data.results);
     await this.s3
       .upload({
         Bucket: this.config.Bucket,
         Body: body,
-        Key: commitSha,
+        Key: data.commitSha,
       })
       .promise();
   }

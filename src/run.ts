@@ -42,7 +42,7 @@ export async function run(opts: Opts) {
     console.log(`Persisting new benchmark data for branch '${branch}' commit '${currBench.commitSha}'`);
     // TODO: prune and limit total entries
     // appendBenchmarkToHistoryAndPrune(history, currBench, branch, opts);
-    await historyProvider.writeCommit(currBench.commitSha, currBench);
+    await historyProvider.writeCommit(currBench);
   }
 
   const resultsComp = computeBenchComparision(currBench, prevBench, opts.threshold);

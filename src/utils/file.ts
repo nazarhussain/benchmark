@@ -23,11 +23,11 @@ export function writeJson<T>(filepath: string, json: T): void {
 }
 
 export function fromCsv<T extends any[]>(str: string): T {
-  return csvParse(str);
+  return csvParse(str, {columns: true, cast: true});
 }
 
 export function toCsv<T extends any[]>(data: T): string {
-  return csvStringify(data);
+  return csvStringify(data, {header: true});
 }
 
 export function readCsv<T extends any[]>(filepath: string): T {
