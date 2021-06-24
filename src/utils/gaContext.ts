@@ -106,11 +106,11 @@ export interface GithubActionsEventData {
     sender: GithubActionsUser;
   };
   push: {
-    /** The full git ref that was pushed, "refs/tags/simple-tag" */
+    /** The full git ref that was pushed, "refs/heads/dapplion/feat1" */
     ref: string;
     /**  The SHA of the most recent commit on ref before the push, "6113728f27ae82c7b1a177c8d03f9e96e0adf246" */
     before: string;
-    /**  The SHA of the most recent commit on ref after the push, "0000000000000000000000000000000000000000" */
+    /**  The SHA of the most recent commit on ref after the push, "9612ade44aab69f0a972d69de73d64955b8ed1ef" */
     after: string;
     created: boolean;
     deleted: boolean;
@@ -144,9 +144,9 @@ interface GithubActionsPullRequestObject {
 }
 
 interface GithubActionsPrBase {
-  /** `${userName}:${branchName}`,  "octocat:new-topic" */
+  /** `${userName}:${branchName}`,  "dapplion:dapplion/feat1" */
   label: string;
-  /** branch name, "new-topic" */
+  /** branch name, "dapplion/feat1" */
   ref: string;
   /** head commit sha, "6dcb09b5b57875f334f61aebed695e2e4193db5e"; */
   sha: string;

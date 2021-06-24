@@ -15,7 +15,7 @@ describe("Array iteration", () => {
     runs: 128,
   });
 
-  // nonce = 1
+  // nonce = 3
   let n = 1e6;
   const arr = Array.from({length: n}, (_, i) => i);
 

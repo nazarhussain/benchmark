@@ -18,6 +18,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+        with:
+          # Get the entire git history to walk commit history on head branch
+          fetch-depth: 0
+          # Do not checkout merge commit
+          ref: ${{ github.event.pull_request.head.sha }}
+
       - uses: actions/setup-node@v2-beta
         with:
           node-version: "14.16.0"
@@ -26,10 +32,21 @@ jobs:
         uses: actions/cache@v1
         with:
           path: ./cache
-          key: ${{ runner.os }}-benchmark
+          key: ${{ runner.os }}-benchmark-2
 
       - name: Install
         run: yarn install --frozen-lockfile
+
+      - name: Print git data
+        run: |
+          echo "BEFORE FETCH"
+          git branch
+          git log -n 2
+          echo "FETCH"
+          git fetch origin main
+          echo "AFTER FETCH"
+          git branch
+          git log -n 2
 
       # Run benchmark with custom tooling and stores the output to a file
       - name: Run performance tests

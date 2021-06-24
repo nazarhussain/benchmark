@@ -13,6 +13,6 @@ export async function resolveShouldPersist(opts: Opts, branch: string): Promise<
   }
 
   // Default to only persist the default branch
-  const repoDefaultBranch = await getDefaultBranch();
+  const repoDefaultBranch = await getDefaultBranch(opts);
   return branch === repoDefaultBranch;
 }

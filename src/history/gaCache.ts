@@ -29,19 +29,29 @@ class GaCacheHistoryProvider extends LocalHistoryProvider implements IHistoryPro
     super(tmpDir);
   }
 
-  async listCommits(): Promise<string[]> {
+  async readLatestInBranch(branch: string): Promise<Benchmark | null> {
     await this.initialize();
-    return super.listCommits();
+    return super.readLatestInBranch(branch);
   }
 
-  async readCommit(commitSha: string): Promise<Benchmark | null> {
-    await this.initialize();
-    return super.readCommit(commitSha);
+  async writeLatestInBranch(branch: string, benchmark: Benchmark): Promise<void> {
+    await super.writeLatestInBranch(branch, benchmark);
+    await this.persist();
   }
 
-  async writeCommit(data: Benchmark): Promise<void> {
-    await super.writeCommit(data);
-    await cache.saveCache([this.tmpDir], this.cacheKey);
+  async readHistory(): Promise<Benchmark[]> {
+    await this.initialize();
+    return super.readHistory();
+  }
+
+  async readHistoryCommit(commitSha: string): Promise<Benchmark | null> {
+    await this.initialize();
+    return super.readHistoryCommit(commitSha);
+  }
+
+  async writeToHistory(benchmark: Benchmark): Promise<void> {
+    await super.writeToHistory(benchmark);
+    await this.persist();
   }
 
   private async initialize(): Promise<void> {
@@ -49,5 +59,9 @@ class GaCacheHistoryProvider extends LocalHistoryProvider implements IHistoryPro
       this.initializePromise = cache.restoreCache([this.tmpDir], this.cacheKey);
     }
     return this.initializePromise;
+  }
+
+  private async persist(): Promise<void> {
+    await cache.saveCache([this.tmpDir], this.cacheKey);
   }
 }

@@ -16,6 +16,7 @@ describe.skip("benchmark history gaCache", function () {
   const cacheKey = "ga-cache-testing";
   let historyProvider: ReturnType<typeof getGaCacheHistoryProvider>;
 
+  const branch = "main";
   const benchmark: Benchmark = {
     commitSha: "010101010101010101010101",
     results: [{id: "for loop", averageNs: 16573, runsDone: 1024, totalMs: 465}],
@@ -28,13 +29,13 @@ describe.skip("benchmark history gaCache", function () {
   it("Should write history to ga-cache", async function () {
     if (!isGaRun()) this.skip();
 
-    await historyProvider.writeCommit(benchmark);
+    await historyProvider.writeLatestInBranch(branch, benchmark);
   });
 
   it("Should read history from ga-cache", async function () {
     if (!isGaRun()) this.skip();
 
-    const benchRead = await historyProvider.readCommit(benchmark.commitSha);
+    const benchRead = await historyProvider.readLatestInBranch(branch);
     expect(benchRead).to.deep.equal(benchmark, "Wrong bench read from disk");
   });
 });

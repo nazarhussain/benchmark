@@ -2,6 +2,8 @@ import fs from "fs";
 import csvParse from "csv-parse/lib/sync";
 import csvStringify from "csv-stringify/lib/sync";
 
+type CsvMetadata = Record<string, string>;
+
 export function readJson<T>(filepath: string): T {
   const jsonStr = fs.readFileSync(filepath, "utf8");
 
@@ -22,20 +24,49 @@ export function writeJson<T>(filepath: string, json: T): void {
   fs.writeFileSync(filepath, jsonStr);
 }
 
-export function fromCsv<T extends any[]>(str: string): T {
-  return csvParse(str, {columns: true, cast: true});
+export function fromCsv<T extends any[]>(str: string): {data: T; metadata: CsvMetadata} {
+  const {csv, metadata} = splitCsvMetadata(str);
+  return {
+    data: csvParse(csv, {columns: true, cast: true}),
+    metadata,
+  };
 }
 
-export function toCsv<T extends any[]>(data: T): string {
-  return csvStringify(data, {header: true});
+export function toCsv<T extends any[]>(data: T, metadata?: CsvMetadata): string {
+  // Support Embedded Metadata https://www.w3.org/TR/tabular-data-model/#embedded-metadata
+  const csv = csvStringify(data, {header: true});
+  if (metadata) {
+    const metadataStr = toCsvMetadata(metadata);
+    return `${metadataStr}\n${csv}`;
+  } else {
+    return csv;
+  }
 }
 
-export function readCsv<T extends any[]>(filepath: string): T {
-  const str = fs.readFileSync(filepath, "utf8");
-  return fromCsv(str);
+// CSV metadata
+
+export function toCsvMetadata(metadata: Record<string, string>): string {
+  return Object.entries(metadata)
+    .map(([key, value]) => `#,${key},${value}`)
+    .join("\n");
 }
 
-export function writeCsv<T extends any[]>(filepath: string, data: T): void {
-  const str = toCsv(data);
-  fs.writeFileSync(filepath, str);
+/**
+ * Embedded Metadata https://www.w3.org/TR/tabular-data-model/#embedded-metadata
+ */
+function splitCsvMetadata(str: string): {csv: string; metadata: Record<string, string>} {
+  const metadata: Record<string, string> = {};
+  const rows = str.trim().split("\n");
+
+  let i = 0;
+  for (i = 0; i < rows.length; i++) {
+    const row = rows[i];
+    if (row.startsWith("#")) {
+      const [key, value] = row.slice(2).split(",");
+      metadata[key] = value;
+    } else {
+      break;
+    }
+  }
+  return {csv: rows.slice(i).join("\n"), metadata};
 }

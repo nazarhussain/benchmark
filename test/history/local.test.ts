@@ -8,6 +8,7 @@ describe("benchmark history local", () => {
   const testDir = fs.mkdtempSync("test_files_");
   const historyProvider = new LocalHistoryProvider(testDir);
 
+  const branch = "main";
   const benchmark: Benchmark = {
     commitSha: "010101010101010101010101",
     results: [{id: "for loop", averageNs: 16573, runsDone: 1024, totalMs: 465}],
@@ -17,13 +18,17 @@ describe("benchmark history local", () => {
     rimraf.sync(testDir);
   });
 
-  it("Should write and read history file", async () => {
-    await historyProvider.writeCommit(benchmark);
+  it("Should write and read history", async () => {
+    await historyProvider.writeToHistory(benchmark);
 
-    const commits = await historyProvider.listCommits();
-    expect(commits).to.deep.equal([benchmark.commitSha], "Wrong commit list");
+    const benchmarks = await historyProvider.readHistory();
+    expect(benchmarks).to.deep.equal([benchmark], "Wrong history");
+  });
 
-    const benchRead = await historyProvider.readCommit(benchmark.commitSha);
+  it("Should write and read latest in branch", async () => {
+    await historyProvider.writeLatestInBranch(branch, benchmark);
+
+    const benchRead = await historyProvider.readLatestInBranch(branch);
     expect(benchRead).to.deep.equal(benchmark, "Wrong bench read from disk");
   });
 });

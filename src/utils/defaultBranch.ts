@@ -1,5 +1,6 @@
 import {isGaRun} from "../github/context";
 import {getGithubDefaultBranch} from "../github/octokit";
+import {Opts} from "../types";
 import {shell} from "./shell";
 
 let defaultBranch: string | null = null;
@@ -7,7 +8,11 @@ let defaultBranch: string | null = null;
 /**
  * Return a cached value of a best guess of the repo's default branch
  */
-export async function getDefaultBranch(): Promise<string> {
+export async function getDefaultBranch(opts?: Pick<Opts, "defaultBranch">): Promise<string> {
+  if (opts?.defaultBranch) {
+    return opts.defaultBranch;
+  }
+
   if (defaultBranch === null) {
     defaultBranch = isGaRun() ? await getGithubDefaultBranch() : await guessLocalDefaultBranch();
   }
