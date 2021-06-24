@@ -1,7 +1,7 @@
 import {expect} from "chai";
 import S3 from "aws-sdk/clients/s3";
 import {Benchmark} from "../../src/types";
-import {S3Config, S3HistoryProvider} from "../../src/history/s3";
+import {S3HistoryProvider} from "../../src/history/s3";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -15,22 +15,7 @@ dotenv.config();
 describe.skip("benchmark history S3", function () {
   this.timeout(60 * 1000);
 
-  const {S3_ACCESS_KEY, S3_SECRET_KEY, S3_REGION, S3_BUCKET, S3_ENDPOINT} = process.env;
-
-  if (!S3_ACCESS_KEY) throw Error("No ENV S3_ACCESS_KEY");
-  if (!S3_SECRET_KEY) throw Error("No ENV S3_SECRET_KEY");
-  if (!S3_REGION) throw Error("No ENV S3_REGION");
-  if (!S3_BUCKET) throw Error("No ENV S3_BUCKET");
-  if (!S3_ENDPOINT) throw Error("No ENV S3_ENDPOINT");
-
-  const config: S3Config = {
-    accessKeyId: S3_ACCESS_KEY,
-    secretAccessKey: S3_SECRET_KEY,
-    region: S3_REGION,
-    Bucket: S3_BUCKET,
-    endpoint: S3_ENDPOINT,
-  };
-  const historyProvider = new S3HistoryProvider(config);
+  const historyProvider = S3HistoryProvider.fromEnv();
 
   const branch = "main";
   const benchmark: Benchmark = {
@@ -57,6 +42,7 @@ describe.skip("benchmark history S3", function () {
   });
 
   after("Delete uploaded artifacts", async () => {
+    const config = historyProvider["config"];
     const s3 = new S3(config);
     const keys = [
       historyProvider["getLatestInBranchKey"](branch),

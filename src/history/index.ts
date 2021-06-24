@@ -19,7 +19,7 @@ export function getHistoryProvider(opts: Opts): IHistoryProvider {
   }
 
   if (opts.historyS3) {
-    return new S3HistoryProvider({} as any);
+    return S3HistoryProvider.fromEnv();
   }
 
   throw Error("Must specify a history option");

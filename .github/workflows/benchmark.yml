@@ -13,7 +13,7 @@ on:
       - main
 
 jobs:
-  run:
+  history-local:
     runs-on: ubuntu-latest
 
     steps:
@@ -30,6 +30,7 @@ jobs:
 
       - name: GA cache benchmark data
         uses: actions/cache@v1
+        # WARNING! Using the approach benchmark data won't be persisted if the workflow fails
         if: always()
         with:
           path: ./cache
@@ -38,19 +39,40 @@ jobs:
       - name: Install
         run: yarn install --frozen-lockfile
 
-      - name: Print git data
-        run: |
-          echo "BEFORE FETCH"
-          git branch
-          git log -n 2
-          echo "FETCH"
-          git fetch origin main
-          echo "AFTER FETCH"
-          git branch
-          git log -n 2
-
       # Run benchmark with custom tooling and stores the output to a file
       - name: Run performance tests
         run: yarn benchmark --local ./cache
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  history-s3:
+    runs-on: ubuntu-latest
+    # Ensure both don't run at the same time
+    needs: history-local
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          # Get the entire git history to walk commit history on head branch
+          fetch-depth: 0
+          # Do not checkout merge commit
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - uses: actions/setup-node@v2-beta
+        with:
+          node-version: "14.16.0"
+
+      - name: Install
+        run: yarn install --frozen-lockfile
+
+      # Run benchmark with custom tooling and stores the output to a file
+      - name: Run performance tests
+        run: yarn benchmark --s3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # S3 credentials
+          S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
+          S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
+          S3_REGION: ${{ secrets.S3_REGION }}
+          S3_BUCKET: ${{ secrets.S3_BUCKET }}
+          S3_ENDPOINT: ${{ secrets.S3_ENDPOINT }}

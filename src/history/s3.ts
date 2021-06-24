@@ -24,6 +24,24 @@ export class S3HistoryProvider implements IHistoryProvider {
     this.s3 = new S3(config);
   }
 
+  static fromEnv(): S3HistoryProvider {
+    const {S3_ACCESS_KEY, S3_SECRET_KEY, S3_REGION, S3_BUCKET, S3_ENDPOINT} = process.env;
+
+    if (!S3_ACCESS_KEY) throw Error("No ENV S3_ACCESS_KEY");
+    if (!S3_SECRET_KEY) throw Error("No ENV S3_SECRET_KEY");
+    if (!S3_REGION) throw Error("No ENV S3_REGION");
+    if (!S3_BUCKET) throw Error("No ENV S3_BUCKET");
+    // S3_ENDPOINT is optional
+
+    return new S3HistoryProvider({
+      accessKeyId: S3_ACCESS_KEY,
+      secretAccessKey: S3_SECRET_KEY,
+      region: S3_REGION,
+      Bucket: S3_BUCKET,
+      endpoint: S3_ENDPOINT,
+    });
+  }
+
   async readLatestInBranch(branch: string): Promise<Benchmark | null> {
     const key = this.getLatestInBranchKey(branch);
     return this.readBenchFile(key);
