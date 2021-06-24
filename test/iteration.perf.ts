@@ -30,7 +30,7 @@ describe("Array iteration", () => {
     arr.reduce((total, curr) => total + curr, 0);
 
     // Uncomment below to cause a guaranteed performance regression
-    // arr.reduce((total, curr) => total + curr, 0);
-    // arr.reduce((total, curr) => total + curr, 0);
+    arr.reduce((total, curr) => total + curr, 0);
+    arr.reduce((total, curr) => total + curr, 0);
   });
 });
