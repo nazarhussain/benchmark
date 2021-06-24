@@ -39,6 +39,12 @@ jobs:
 
       - name: Print git data
         run: |
+          echo "BEFORE FETCH"
+          git branch
+          git log -n 2
+          echo "FETCH"
+          git fetch
+          echo "AFTER FETCH"
           git branch
           git log -n 2
 
