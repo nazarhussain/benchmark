@@ -3,16 +3,17 @@ import {BenchmarkComparision, ResultComparision} from "../types";
 type CommitsSha = Pick<BenchmarkComparision, "currCommitSha" | "prevCommitSha">;
 
 export function renderComment(benchComp: BenchmarkComparision): string {
-  const badbenchComp = benchComp.results.filter((r) => r.isFailed);
+  const isFailedResults = benchComp.results.filter((r) => r.isFailed);
+  const isImprovedResults = benchComp.results.filter((r) => r.isImproved);
 
-  const topSection = benchComp.someFailed
+  let body = benchComp.someFailed
     ? // If there was any bad benchmark print a table only with the bad results
       `## :warning: **Performance Alert** :warning:
 
 Possible performance regression was detected for some benchmarks.
 Benchmark result of this commit is worse than the previous benchmark result exceeding threshold.
   
-${renderBenchmarkTable(badbenchComp, benchComp)}
+${renderBenchmarkTable(isFailedResults, benchComp)}
 `
     : // Otherwise, just add a title
       `## Performance Report
@@ -21,8 +22,17 @@ ${renderBenchmarkTable(badbenchComp, benchComp)}
 
 `;
 
+  if (isImprovedResults.length > 0) {
+    body += `
+  
+🚀🚀 Significant benchmark improvement detected
+
+${renderBenchmarkTable(isImprovedResults, benchComp)}
+`;
+  }
+
   // For all cases attach the full benchmarks
-  return `${topSection}
+  return `${body}
 
 <details><summary>Full benchmark results</summary>
 

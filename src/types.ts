@@ -51,6 +51,7 @@ export type ResultComparision = {
   prevAverageNs: number | null;
   ratio: number | null;
   isFailed: boolean;
+  isImproved: boolean;
 };
 
 /** Github API type */

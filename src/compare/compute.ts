@@ -24,6 +24,7 @@ export function computeBenchComparision(
         prevAverageNs: prevBench.averageNs,
         ratio,
         isFailed: ratio > threshold,
+        isImproved: ratio < 1 / threshold,
       };
     } else {
       return {
@@ -32,6 +33,7 @@ export function computeBenchComparision(
         prevAverageNs: null,
         ratio: null,
         isFailed: false,
+        isImproved: false,
       };
     }
   });
