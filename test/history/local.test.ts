@@ -5,14 +5,14 @@ import {Benchmark} from "../../src/types";
 import {LocalHistoryProvider} from "../../src/history/local";
 
 describe("benchmark history local", () => {
-  const testDir = fs.mkdtempSync("test_files_");
-  const historyProvider = new LocalHistoryProvider(testDir);
-
   const branch = "main";
   const benchmark: Benchmark = {
     commitSha: "010101010101010101010101",
     results: [{id: "for loop", averageNs: 16573, runsDone: 1024, totalMs: 465}],
   };
+
+  const testDir = fs.mkdtempSync("test_files_");
+  const historyProvider = new LocalHistoryProvider(testDir);
 
   after(() => {
     rimraf.sync(testDir);

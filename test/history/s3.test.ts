@@ -15,13 +15,16 @@ dotenv.config();
 describe.skip("benchmark history S3", function () {
   this.timeout(60 * 1000);
 
-  const historyProvider = S3HistoryProvider.fromEnv();
-
   const branch = "main";
   const benchmark: Benchmark = {
     commitSha: "010101010101010101010101",
     results: [{id: "for loop", averageNs: 16573, runsDone: 1024, totalMs: 465}],
   };
+
+  let historyProvider: S3HistoryProvider;
+  before(() => {
+    historyProvider = S3HistoryProvider.fromEnv();
+  });
 
   it("Should write latest to ga-cache", async function () {
     await historyProvider.writeLatestInBranch(branch, benchmark);
