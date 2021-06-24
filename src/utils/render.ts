@@ -44,7 +44,7 @@ function renderBenchmarkTable(benchComp: ResultComparision[], {currCommitSha, pr
     }
   });
 
-  return `| Benchmark suite | Previous: ${prevCommitSha} | Current: ${currCommitSha} | Ratio |
+  return `| Benchmark suite | Current: ${currCommitSha} | Previous: ${prevCommitSha ?? "-"} | Ratio |
 |-|-|-|-|
 ${rows.join("\n")}
 `;
