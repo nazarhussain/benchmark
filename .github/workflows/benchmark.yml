@@ -54,11 +54,38 @@ jobs:
           path: ./cache
           if-no-files-found: error
 
+  ga-cache:
+    if: always()
+    runs-on: ubuntu-latest
+    # Ensure both don't run at the same time
+    needs: [local]
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          # Get the entire git history to walk commit history on head branch
+          fetch-depth: 0
+          # Do not checkout merge commit
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - uses: actions/setup-node@v2-beta
+        with:
+          node-version: "14.16.0"
+
+      - name: Install
+        run: yarn install --frozen-lockfile
+
+      # Run benchmark with custom tooling and stores the output to a file
+      - name: Run performance tests
+        run: yarn benchmark --ga-cache ${{ runner.os }}-benchmark-data
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   s3:
     if: always()
     runs-on: ubuntu-latest
     # Ensure both don't run at the same time
-    needs: local
+    needs: [local, ga-cache]
 
     steps:
       - uses: actions/checkout@v2
