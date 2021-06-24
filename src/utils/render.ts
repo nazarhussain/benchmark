@@ -7,7 +7,7 @@ export function renderComment(benchComp: BenchmarkComparision): string {
 
   const topSection = benchComp.someFailed
     ? // If there was any bad benchmark print a table only with the bad results
-      `# :warning: **Performance Alert** :warning:
+      `## :warning: **Performance Alert** :warning:
 
 Possible performance regression was detected for some benchmarks.
 Benchmark result of this commit is worse than the previous benchmark result exceeding threshold.
@@ -15,7 +15,7 @@ Benchmark result of this commit is worse than the previous benchmark result exce
 ${renderBenchmarkTable(badbenchComp, benchComp)}
 `
     : // Otherwise, just add a title
-      `# Performance Report
+      `## Performance Report
 
 ✔️ no performance regression detected      
 
