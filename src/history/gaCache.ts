@@ -29,6 +29,11 @@ class GaCacheHistoryProvider extends LocalHistoryProvider implements IHistoryPro
     super(tmpDir);
   }
 
+  providerInfo() {
+    const info = {dirpath: this.tmpDir, cacheKey: this.cacheKey};
+    return `GaCacheHistoryProvider: ${JSON.stringify(info, null, 2)}`;
+  }
+
   async readLatestInBranch(branch: string): Promise<Benchmark | null> {
     await this.initialize();
     return super.readLatestInBranch(branch);

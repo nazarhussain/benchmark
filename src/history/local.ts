@@ -34,6 +34,11 @@ interface CsvMeta {
 export class LocalHistoryProvider implements IHistoryProvider {
   constructor(private readonly dirpath: string) {}
 
+  providerInfo() {
+    const info = {dirpath: this.dirpath};
+    return `LocalHistoryProvider: ${JSON.stringify(info, null, 2)}`;
+  }
+
   async readLatestInBranch(branch: string): Promise<Benchmark | null> {
     const filepath = this.getLatestInBranchFilepath(branch);
     return this.readBenchFileIfExists(filepath);

@@ -23,6 +23,7 @@ import {Benchmark} from "../types";
  * In history you can ONLY track a single branch, which should be the main branch.
  */
 export interface IHistoryProvider {
+  providerInfo(): string;
   readLatestInBranch(branch: string): Promise<Benchmark | null>;
   writeLatestInBranch(branch: string, benchmark: Benchmark): Promise<void>;
   readHistory(): Promise<Benchmark[]>;

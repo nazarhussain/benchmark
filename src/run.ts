@@ -12,6 +12,7 @@ import {isGaRun} from "./github/context";
 export async function run(opts: Opts) {
   // Retrieve history
   const historyProvider = getHistoryProvider(opts);
+  console.log(`Connected to historyProvider: ${historyProvider.providerInfo()}`);
 
   // Select prev benchmark to compare against
   const prevBench = await resolveCompare(historyProvider, opts);

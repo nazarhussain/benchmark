@@ -24,6 +24,11 @@ export class S3HistoryProvider implements IHistoryProvider {
     this.s3 = new S3(config);
   }
 
+  providerInfo() {
+    const info = {Bucket: this.config.Bucket, region: this.config.region};
+    return `S3HistoryProvider: ${JSON.stringify(info, null, 2)}`;
+  }
+
   /**
    * Automatically loads credentials from ENV
    *
