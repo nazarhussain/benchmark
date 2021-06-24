@@ -25,13 +25,13 @@ describe.skip("benchmark history gaCache", function () {
     historyProvider = getGaCacheHistoryProvider(cacheKey);
   });
 
-  it("Should write history to ga-cache", async function () {
+  it("writeLatestInBranch", async function () {
     if (!isGaRun()) this.skip();
 
     await historyProvider.writeLatestInBranch(branch, benchmark);
   });
 
-  it("Should read history from ga-cache", async function () {
+  it("readLatestInBranch", async function () {
     if (!isGaRun()) this.skip();
 
     const benchRead = await historyProvider.readLatestInBranch(branch);

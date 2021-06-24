@@ -26,20 +26,20 @@ describe.skip("benchmark history S3", function () {
     historyProvider = S3HistoryProvider.fromEnv();
   });
 
-  it("Should write latest to ga-cache", async function () {
+  it("writeLatestInBranch", async function () {
     await historyProvider.writeLatestInBranch(branch, benchmark);
   });
 
-  it("Should read latest from ga-cache", async function () {
+  it("readLatestInBranch", async function () {
     const benchRead = await historyProvider.readLatestInBranch(branch);
     expect(benchRead).to.deep.equal(benchmark, "Wrong bench read from disk");
   });
 
-  it("Write to history", async function () {
+  it("writeToHistory", async function () {
     await historyProvider.writeToHistory(benchmark);
   });
 
-  it("Read history", async function () {
+  it("readHistory", async function () {
     const benchmarks = await historyProvider.readHistory();
     expect(benchmarks).to.deep.equal([benchmark], "Wrong history");
   });
