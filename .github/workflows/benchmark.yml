@@ -46,6 +46,15 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Check files
+        if: always()
+        run: |
+          echo "./cache/history"
+          ls -ltr ./cache/history
+          echo "./cache/latest"
+          ls -ltr ./cache/latest
+          cat ./cache/latest/main
+
   s3:
     if: always()
     runs-on: ubuntu-latest
