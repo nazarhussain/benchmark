@@ -24,7 +24,7 @@ ${renderBenchmarkTable(badbenchComp, benchComp)}
   // For all cases attach the full benchmarks
   return `${topSection}
 
-<details>
+<details><summary>Full benchmark results</summary>
 
 ${renderBenchmarkTable(benchComp.results, benchComp)}
 
