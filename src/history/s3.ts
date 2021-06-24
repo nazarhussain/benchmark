@@ -109,10 +109,11 @@ export class S3HistoryProvider implements IHistoryProvider {
 
   private async readBenchFileIfExists(key: string): Promise<Benchmark | null> {
     try {
-      return this.readBenchFile(key);
+      return await this.readBenchFile(key);
     } catch (e) {
-      console.log(e);
-      if (e.code === "ENOENT") {
+      // Found with trial an error
+      // NoSuchKey: Error on getObject latest/main: null
+      if (e.code === "NoSuchKey") {
         return null;
       } else {
         throw e;
