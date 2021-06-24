@@ -12,6 +12,7 @@ export async function commetToPrUpdatable(prNumber: number, body: string): Promi
     ...repo,
     issue_number: prNumber,
   });
+  console.log("comments", comments);
   const prevComment = comments.data.find((c) => c.body_text && c.body_text.includes(prCommentTag));
 
   if (prevComment) {
