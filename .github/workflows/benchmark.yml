@@ -14,6 +14,7 @@ on:
 
 jobs:
   history-local:
+    if: always()
     runs-on: ubuntu-latest
 
     steps:
@@ -46,6 +47,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   history-s3:
+    if: always()
     runs-on: ubuntu-latest
     # Ensure both don't run at the same time
     needs: history-local
