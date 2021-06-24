@@ -1,10 +1,9 @@
 import * as github from "@actions/github";
 import {getHistoryProvider} from "./history";
-import {appendBenchmarkToHistoryAndPrune} from "./history/append";
 import {resolveShouldPersist} from "./history/shouldPersist";
 import {Benchmark, Opts} from "./types";
 import {resolveCompare} from "./compare";
-import {parseBranchFromRef, getCurrentCommitInfo, shell} from "./utils";
+import {parseBranchFromRef, getCurrentCommitInfo, shell, getCurrentBranch} from "./utils";
 import {runMochaBenchmark} from "./mochaPlugin/mochaRunner";
 import {computeBenchComparision} from "./compare/compute";
 import {postGaComment} from "./github/comment";
@@ -27,9 +26,6 @@ export async function run(opts: Opts) {
     throw Error("No benchmark result was produced");
   }
 
-  const refStr = github.context.ref || (await shell("git symbolic-ref HEAD"));
-  const branch = parseBranchFromRef(refStr);
-
   const currentCommit = await getCurrentCommitInfo();
   const currBench: Benchmark = {
     commitSha: currentCommit.commitSha,
@@ -37,8 +33,11 @@ export async function run(opts: Opts) {
   };
 
   // Persist new benchmark data
-  const shouldPersist = await resolveShouldPersist(opts, branch);
+  const currentBranch = await getCurrentBranch();
+  const shouldPersist = await resolveShouldPersist(opts, currentBranch);
   if (shouldPersist === true) {
+    const refStr = github.context.ref || (await shell("git symbolic-ref HEAD"));
+    const branch = parseBranchFromRef(refStr);
     console.log(`Persisting new benchmark data for branch '${branch}' commit '${currBench.commitSha}'`);
     // TODO: prune and limit total entries
     // appendBenchmarkToHistoryAndPrune(history, currBench, branch, opts);

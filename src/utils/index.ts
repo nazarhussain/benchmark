@@ -1,3 +1,4 @@
+export * from "./currentBranch";
 export * from "./defaultBranch";
 export * from "./file";
 export * from "./gaContext";
