@@ -15,7 +15,11 @@ Benchmark result of this commit is worse than the previous benchmark result exce
 ${renderBenchmarkTable(badbenchComp, benchComp)}
 `
     : // Otherwise, just add a title
-      "# Performance Report";
+      `# Performance Report
+
+✔️ no performance regression detected      
+
+`;
 
   // For all cases attach the full benchmarks
   return `${topSection}
