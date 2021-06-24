@@ -43,7 +43,7 @@ jobs:
           git branch
           git log -n 2
           echo "FETCH"
-          git fetch
+          git fetch --all
           echo "AFTER FETCH"
           git branch
           git log -n 2
