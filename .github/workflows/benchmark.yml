@@ -37,6 +37,11 @@ jobs:
       - name: Install
         run: yarn install --frozen-lockfile
 
+      - name: Print git data
+        run: |
+          git branch
+          git log -n 2
+
       # Run benchmark with custom tooling and stores the output to a file
       - name: Run performance tests
         run: yarn benchmark --local ./cache
