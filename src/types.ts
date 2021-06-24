@@ -9,6 +9,7 @@ export type Opts = Partial<FileCollectionOptions> & {
   compareCommit?: string;
   prune?: boolean;
   persist?: boolean;
+  noThrow?: boolean;
   historyLocal?: string | boolean;
   historyGaCache?: string | boolean;
   historyS3?: boolean;

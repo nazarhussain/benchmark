@@ -49,6 +49,10 @@ export const options: ICliCommandOptions<CliOpts> = {
     description: "Force persisting benchmark data in history",
     type: "boolean",
   },
+  noThrow: {
+    description: "Exit cleanly even if a preformance regression was found",
+    type: "boolean",
+  },
   historyLocal: {
     alias: ["local"],
     description:

@@ -2,7 +2,7 @@ import fs from "fs";
 import * as cache from "@actions/cache";
 import {Benchmark} from "../types";
 import {LocalHistoryProvider} from "./local";
-import {IHistoryProvider} from "./provider";
+import {HistoryProviderType, IHistoryProvider} from "./provider";
 
 /**
  * Persist results in CSV, one benchmark result per file
@@ -23,6 +23,7 @@ export function getGaCacheHistoryProvider(cacheKey: string): IHistoryProvider {
 }
 
 class GaCacheHistoryProvider extends LocalHistoryProvider implements IHistoryProvider {
+  readonly type = HistoryProviderType.GaCache;
   private initializePromise: Promise<any> | null = null;
 
   constructor(private readonly tmpDir: string, private readonly cacheKey: string) {

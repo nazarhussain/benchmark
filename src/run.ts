@@ -9,6 +9,7 @@ import {runMochaBenchmark} from "./mochaPlugin/mochaRunner";
 import {computeBenchComparision} from "./compare/compute";
 import {postGaComment} from "./github/comment";
 import {isGaRun} from "./github/context";
+import {HistoryProviderType} from "./history/provider";
 
 export async function run(opts: Opts) {
   // Retrieve history
@@ -57,7 +58,7 @@ export async function run(opts: Opts) {
     await postGaComment(resultsComp);
   }
 
-  if (resultsComp.someFailed) {
+  if (resultsComp.someFailed && !opts.noThrow) {
     throw Error("Performance regression");
   }
 }

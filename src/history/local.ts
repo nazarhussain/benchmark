@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import {IHistoryProvider} from "./provider";
+import {HistoryProviderType, IHistoryProvider} from "./provider";
 import {Benchmark, BenchmarkResults} from "../types";
 import {fromCsv, toCsv} from "../utils/file";
 
@@ -32,6 +32,7 @@ interface CsvMeta {
  * ```
  */
 export class LocalHistoryProvider implements IHistoryProvider {
+  readonly type: HistoryProviderType = HistoryProviderType.Local;
   constructor(private readonly dirpath: string) {}
 
   providerInfo() {

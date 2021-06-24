@@ -1,5 +1,11 @@
 import {Benchmark} from "../types";
 
+export enum HistoryProviderType {
+  Local = "Local",
+  GaCache = "GaCache",
+  S3 = "S3",
+}
+
 /**
  * How to organize data?
  * - Most times you want the latest benchmark in a branch:
@@ -23,6 +29,7 @@ import {Benchmark} from "../types";
  * In history you can ONLY track a single branch, which should be the main branch.
  */
 export interface IHistoryProvider {
+  readonly type: HistoryProviderType;
   providerInfo(): string;
   readLatestInBranch(branch: string): Promise<Benchmark | null>;
   writeLatestInBranch(branch: string, benchmark: Benchmark): Promise<void>;
