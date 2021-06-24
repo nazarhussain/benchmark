@@ -5,6 +5,9 @@
   "repository": "git@github.com:dapplion/benchmark.git",
   "author": "dapplion <35266934+dapplion@users.noreply.github.com>",
   "license": "MIT",
+  "bin": {
+    "benchmark": "lib/cli.js"
+  },
   "scripts": {
     "build": "tsc",
     "test": "mocha test/**/*.test.ts",
