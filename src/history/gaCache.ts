@@ -60,6 +60,7 @@ class GaCacheHistoryProvider extends LocalHistoryProvider implements IHistoryPro
   }
 
   private async initialize(): Promise<void> {
+    console.log("ENV", process.env);
     if (this.initializePromise === null) {
       this.initializePromise = cache.restoreCache([this.tmpDir], this.cacheKey);
     }
