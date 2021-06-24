@@ -2,18 +2,16 @@ import path from "path";
 import S3 from "aws-sdk/clients/s3";
 import {Benchmark, BenchmarkResults} from "../types";
 import {fromCsv, toCsv} from "../utils";
-import {LocalHistoryProvider} from "./local";
 import {IHistoryProvider} from "./provider";
 
-export interface S3Config {
+export type S3Config = Pick<S3.Types.ClientConfiguration, "accessKeyId" | "secretAccessKey" | "region" | "endpoint"> & {
   Bucket: string;
-  region: string;
-  accessKeyId: string;
-  secretAccessKey: string;
-}
+};
 
 const historyDir = "history";
 const latestDir = "latest";
+
+const MAX_ITEMS_TO_LIST = 100;
 
 interface CsvMeta {
   commit: string;
@@ -36,18 +34,27 @@ export class S3HistoryProvider implements IHistoryProvider {
     this.writeBenchFile(key, benchmark);
   }
 
-  async readHistory(): Promise<Benchmark[]> {
-    // TODO
-
+  async readHistory(maxItems = MAX_ITEMS_TO_LIST): Promise<Benchmark[]> {
     const objects = await this.s3
       .listObjects({
+        Prefix: historyDir,
         Bucket: this.config.Bucket,
+        MaxKeys: maxItems,
       })
       .promise();
 
-    console.log(objects);
+    if (!objects.Contents) {
+      throw Error("s3 response.Contents is falsy");
+    }
 
-    return [];
+    const keys: string[] = [];
+    for (const obj of objects.Contents) {
+      if (obj.Key) {
+        keys.push(obj.Key);
+      }
+    }
+
+    return await Promise.all(keys.map(async (key) => this.readBenchFile(key)));
   }
 
   async readHistoryCommit(commitSha: string): Promise<Benchmark | null> {
@@ -68,10 +75,16 @@ export class S3HistoryProvider implements IHistoryProvider {
       })
       .promise();
 
-    const str = res.Body;
+    if (!res.Body) {
+      throw Error("s3 response.Body is falsy");
+    }
 
-    if (typeof str !== "string") {
-      throw Error("Body not of string type");
+    let str: string;
+    if (typeof res.Body === "string") {
+      str = res.Body;
+    } else {
+      const buff = Buffer.from(res.Body as ArrayBuffer);
+      str = buff.toString("utf8");
     }
 
     const {data, metadata} = fromCsv<BenchmarkResults>(str);
