@@ -46,14 +46,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Check files
+      - name: Upload cached data
         if: always()
-        run: |
-          echo "./cache/history"
-          ls -ltr ./cache/history
-          echo "./cache/latest"
-          ls -ltr ./cache/latest
-          cat ./cache/latest/main
+        uses: actions/upload-artifact@v2
+        with:
+          name: benchmark-cache-debug
+          path: ./cache
+          if-no-files-found: error
 
   s3:
     if: always()
