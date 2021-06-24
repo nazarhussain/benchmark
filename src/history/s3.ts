@@ -24,21 +24,39 @@ export class S3HistoryProvider implements IHistoryProvider {
     this.s3 = new S3(config);
   }
 
+  /**
+   * Automatically loads credentials from ENV
+   *
+   * Custom ENVs
+   *
+   * S3_ACCESS_KEY
+   * S3_SECRET_KEY
+   * S3_REGION (optional)
+   * S3_ENDPOINT (optional)
+   *
+   * AWS ENVs
+   *
+   * AWS_ACCESS_KEY_ID
+   * AWS_SECRET_ACCESS_KEY
+   * AWS_SESSION_TOKEN (optional)
+   *
+   * https://docs.aws.amazon.com/sdk-for-javascript/v2/developer-guide/loading-node-credentials-environment.html
+   */
   static fromEnv(): S3HistoryProvider {
     const {S3_ACCESS_KEY, S3_SECRET_KEY, S3_REGION, S3_BUCKET, S3_ENDPOINT} = process.env;
 
-    if (!S3_ACCESS_KEY) throw Error("No ENV S3_ACCESS_KEY");
-    if (!S3_SECRET_KEY) throw Error("No ENV S3_SECRET_KEY");
-    if (!S3_REGION) throw Error("No ENV S3_REGION");
     if (!S3_BUCKET) throw Error("No ENV S3_BUCKET");
+    // S3_ACCESS_KEY is optional
+    // S3_SECRET_KEY is optional
+    // S3_REGION is optional
     // S3_ENDPOINT is optional
 
     return new S3HistoryProvider({
-      accessKeyId: S3_ACCESS_KEY,
-      secretAccessKey: S3_SECRET_KEY,
-      region: S3_REGION,
+      accessKeyId: ifSet(S3_ACCESS_KEY),
+      secretAccessKey: ifSet(S3_SECRET_KEY),
+      region: ifSet(S3_REGION),
       Bucket: S3_BUCKET,
-      endpoint: S3_ENDPOINT,
+      endpoint: ifSet(S3_ENDPOINT),
     });
   }
 
@@ -131,4 +149,9 @@ export class S3HistoryProvider implements IHistoryProvider {
   private getHistoryCommitKey(commitSha: string): string {
     return path.join(historyDir, commitSha);
   }
+}
+
+/** Prevent returning empty strings to JS app layer */
+function ifSet(str: string | undefined): string | undefined {
+  return str ? str : undefined;
 }
