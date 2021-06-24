@@ -50,7 +50,7 @@ jobs:
     if: always()
     runs-on: ubuntu-latest
     # Ensure both don't run at the same time
-    needs: history-local
+    needs: local
 
     steps:
       - uses: actions/checkout@v2
