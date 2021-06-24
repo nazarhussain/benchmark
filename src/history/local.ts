@@ -69,7 +69,7 @@ export class LocalHistoryProvider implements IHistoryProvider {
 
   private readBenchFileIfExists(filepath: string): Benchmark | null {
     try {
-      return this.readBenchFileIfExists(filepath);
+      return this.readBenchFile(filepath);
     } catch (e) {
       if (e.code === "ENOENT") return null;
       else throw e;
