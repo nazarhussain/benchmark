@@ -62,7 +62,7 @@ export class S3HistoryProvider implements IHistoryProvider {
 
   async readLatestInBranch(branch: string): Promise<Benchmark | null> {
     const key = this.getLatestInBranchKey(branch);
-    return this.readBenchFile(key);
+    return this.readBenchFileIfExists(key);
   }
 
   async writeLatestInBranch(branch: string, benchmark: Benchmark): Promise<void> {
@@ -77,7 +77,11 @@ export class S3HistoryProvider implements IHistoryProvider {
         Bucket: this.config.Bucket,
         MaxKeys: maxItems,
       })
-      .promise();
+      .promise()
+      .catch((e) => {
+        e.message = `Error on listObjects: ${e.message}`;
+        throw e;
+      });
 
     if (!objects.Contents) {
       throw Error("s3 response.Contents is falsy");
@@ -95,12 +99,25 @@ export class S3HistoryProvider implements IHistoryProvider {
 
   async readHistoryCommit(commitSha: string): Promise<Benchmark | null> {
     const key = this.getHistoryCommitKey(commitSha);
-    return this.readBenchFile(key);
+    return this.readBenchFileIfExists(key);
   }
 
   async writeToHistory(benchmark: Benchmark): Promise<void> {
     const key = this.getHistoryCommitKey(benchmark.commitSha);
     this.writeBenchFile(key, benchmark);
+  }
+
+  private async readBenchFileIfExists(key: string): Promise<Benchmark | null> {
+    try {
+      return this.readBenchFile(key);
+    } catch (e) {
+      console.log(e);
+      if (e.code === "ENOENT") {
+        return null;
+      } else {
+        throw e;
+      }
+    }
   }
 
   private async readBenchFile(key: string): Promise<Benchmark> {
@@ -109,7 +126,11 @@ export class S3HistoryProvider implements IHistoryProvider {
         Bucket: this.config.Bucket,
         Key: key,
       })
-      .promise();
+      .promise()
+      .catch((e) => {
+        e.message = `Error on getObject ${key}: ${e.message}`;
+        throw e;
+      });
 
     if (!res.Body) {
       throw Error("s3 response.Body is falsy");
@@ -139,7 +160,11 @@ export class S3HistoryProvider implements IHistoryProvider {
         Body: str,
         Key: key,
       })
-      .promise();
+      .promise()
+      .catch((e) => {
+        e.message = `Error on upload ${key}: ${e.message}`;
+        throw e;
+      });
   }
 
   private getLatestInBranchKey(branch: string): string {
