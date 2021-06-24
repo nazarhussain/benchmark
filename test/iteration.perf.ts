@@ -28,5 +28,7 @@ describe("Array iteration", () => {
 
   itBench("sum array with reduce", () => {
     arr.reduce((total, curr) => total + curr, 0);
+    arr.reduce((total, curr) => total + curr, 0);
+    arr.reduce((total, curr) => total + curr, 0);
   });
 });
