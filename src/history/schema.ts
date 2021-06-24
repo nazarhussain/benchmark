@@ -1,5 +1,5 @@
 import Ajv from "ajv";
-import {BenchmarkHistory, BenchmarkResults} from "../types";
+import {BenchmarkHistory, Benchmark} from "../types";
 
 export const emptyBenchmarkHistory: BenchmarkHistory = {benchmarks: {}};
 
@@ -25,12 +25,10 @@ const benchmarkResultsSchema = {
 const benchmarkSchema = {
   type: "object",
   properties: {
-    branch: {type: "string"},
     commitSha: {type: "string"},
-    timestamp: {type: "integer"},
     results: benchmarkResultsSchema,
   },
-  required: ["branch", "commitSha", "timestamp", "results"],
+  required: ["commitSha", "results"],
 };
 
 /** TS type `BenchmarkHistory` */
@@ -50,8 +48,8 @@ const benchmarkHistorySchema = {
   required: ["benchmarks"],
 };
 
-export function validateBenchmarkResults(data: BenchmarkResults): void {
-  const validate = ajv.compile(benchmarkResultsSchema);
+export function validateBenchmark(data: Benchmark): void {
+  const validate = ajv.compile(benchmarkSchema);
   const valid = validate(data);
   if (!valid) {
     console.log(data);

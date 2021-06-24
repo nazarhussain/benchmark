@@ -3,7 +3,7 @@ import {Benchmark, Opts} from "../types";
 import {getGithubEventData, GithubActionsEventData, parseBranchFromRef, getDefaultBranch} from "../utils";
 import {isGaRun} from "../github/context";
 import {IHistoryProvider} from "../history/provider";
-import {validateBenchmarkResults} from "../history/schema";
+import {validateBenchmark} from "../history/schema";
 
 /** Number of commits to consider when finding benchmark data on a branch */
 const COMMIT_COUNT_LOOKBACK = 100;
@@ -20,10 +20,9 @@ export type CompareWith =
 export async function resolveCompare(provider: IHistoryProvider, opts: Opts): Promise<Benchmark | null> {
   const compareWith = await resolveCompareWith(opts);
   const prevBench = await resolvePrevBenchmark(compareWith, provider);
-
   if (!prevBench) return null;
 
-  validateBenchmarkResults(prevBench.results);
+  validateBenchmark(prevBench);
 
   return prevBench;
 }
@@ -39,6 +38,21 @@ export async function resolvePrevBenchmark(
     case CompareWithType.latestCommitInBranch: {
       // Try first latest commit in branch
       return await provider.readLatestInBranch(compareWith.branch);
+    }
+  }
+}
+
+export function renderCompareWith(compareWith: CompareWith): string {
+  switch (compareWith.type) {
+    case CompareWithType.exactCommit:
+      return `exactCommit ${compareWith.commitSha}`;
+
+    case CompareWithType.latestCommitInBranch: {
+      if (compareWith.before) {
+        return `latestCommitInBranch '${compareWith.branch}'`;
+      } else {
+        return `latestCommitInBranch '${compareWith.branch}' before commit ${compareWith.before}`;
+      }
     }
   }
 }

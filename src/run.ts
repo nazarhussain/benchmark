@@ -1,8 +1,9 @@
 import * as github from "@actions/github";
 import {getHistoryProvider} from "./history";
 import {resolveShouldPersist} from "./history/shouldPersist";
+import {validateBenchmark} from "./history/schema";
 import {Benchmark, Opts} from "./types";
-import {resolveCompare} from "./compare";
+import {renderCompareWith, resolveCompareWith, resolvePrevBenchmark} from "./compare";
 import {parseBranchFromRef, getCurrentCommitInfo, shell, getCurrentBranch} from "./utils";
 import {runMochaBenchmark} from "./mochaPlugin/mochaRunner";
 import {computeBenchComparision} from "./compare/compute";
@@ -15,9 +16,13 @@ export async function run(opts: Opts) {
   console.log(`Connected to historyProvider: ${historyProvider.providerInfo()}`);
 
   // Select prev benchmark to compare against
-  const prevBench = await resolveCompare(historyProvider, opts);
+  const compareWith = await resolveCompareWith(opts);
+  const prevBench = await resolvePrevBenchmark(compareWith, historyProvider);
   if (prevBench) {
-    console.log(`Comparing results with commit '${prevBench.commitSha}'`);
+    console.log(`Found previous benchmark for ${renderCompareWith(compareWith)}, at commit ${prevBench.commitSha}`);
+    validateBenchmark(prevBench);
+  } else {
+    console.log(`No previous bencharmk found for ${renderCompareWith(compareWith)}`);
   }
 
   // TODO: Forward all options to mocha
