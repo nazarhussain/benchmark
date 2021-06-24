@@ -36,9 +36,6 @@ jobs:
         with:
           path: ./cache
           key: ${{ runner.os }}-benchmark-2
-      # Invalidate cache so 'POST GA cache benchmark data' actually uploads cache data
-      - name: Invalidate cache
-        run: echo "::set-output name=CACHE_KEY::none"
 
       - name: Install
         run: yarn install --frozen-lockfile
