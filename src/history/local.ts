@@ -91,6 +91,7 @@ export class LocalHistoryProvider implements IHistoryProvider {
 
   /** Write result to CSV + metadata as Embedded Metadata */
   private writeBenchFile(filepath: string, benchmark: Benchmark): void {
+    console.log("WRITING Benchmark data to ", filepath, benchmark.commitSha);
     const csvMeta: CsvMeta = {commit: benchmark.commitSha};
     const str = toCsv(benchmark.results, csvMeta as unknown as Record<string, string>);
 
