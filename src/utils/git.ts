@@ -50,7 +50,9 @@ export async function getBranchLatestCommit(branch: string): Promise<string> {
 }
 
 /**
- * Ensure branch exists locally or try to fetch it from origin
+ * Ensure branch exists locally or try to fetch it from origin.
+ * When using actions/checkout users normally only clone a single commit.
+ * Getting the entire git history for all branches is a bit more tricky than this.
  */
 async function ensureBranchExists(branch: string): Promise<void> {
   const refExists = await shell(`git show-ref --verify --quiet refs/heads/${branch}`).then(

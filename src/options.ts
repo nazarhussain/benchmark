@@ -12,6 +12,10 @@ type ICliCommandOptions<OwnArgs> = Required<{[key in keyof OwnArgs]: Options}>;
 type CliOpts = Omit<Opts, "fileGlob" | keyof FileCollectionOptions>;
 
 export const options: ICliCommandOptions<CliOpts> = {
+  defaultBranch: {
+    description: "Provide the default branch of this repository to prevent fetching from Github",
+    type: "string",
+  },
   persistBranches: {
     description: "Choose what branches to persist benchmark data",
     type: "array",

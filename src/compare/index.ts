@@ -74,6 +74,6 @@ export async function resolveCompareWith(opts: Opts): Promise<CompareWith> {
   }
 
   // Otherwise compare against the default branch
-  const defaultBranch = await getDefaultBranch();
+  const defaultBranch = await getDefaultBranch(opts);
   return {type: CompareWithType.latestCommitInBranch, branch: defaultBranch};
 }

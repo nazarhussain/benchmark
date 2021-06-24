@@ -1,6 +1,7 @@
 import {FileCollectionOptions} from "./utils/mochaCliExports";
 
 export type Opts = Partial<FileCollectionOptions> & {
+  defaultBranch?: string;
   persistBranches?: string[];
   benchmarksPerBranch?: number;
   threshold: number;
