@@ -30,7 +30,7 @@ jobs:
           node-version: "14.16.0"
 
       - name: GA cache benchmark data
-        uses: actions/cache@v1
+        uses: actions/cache@v2
         # WARNING! Using the approach benchmark data won't be persisted if the workflow fails
         if: always()
         with:
