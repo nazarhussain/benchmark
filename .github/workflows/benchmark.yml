@@ -32,7 +32,7 @@ jobs:
         uses: actions/cache@v1
         with:
           path: ./cache
-          key: ${{ runner.os }}-benchmark
+          key: ${{ runner.os }}-benchmark-2
 
       - name: Install
         run: yarn install --frozen-lockfile

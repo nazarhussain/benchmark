@@ -1,11 +1,5 @@
 import {Benchmark} from "../types";
 
-export interface IHistoryProvider {
-  listCommits(): Promise<string[]>;
-  readCommit(commitSha: string): Promise<Benchmark | null>;
-  writeCommit(data: Benchmark): Promise<void>;
-}
-
 /**
  * How to organize data?
  * - Most times you want the latest benchmark in a branch:
@@ -27,5 +21,11 @@ export interface IHistoryProvider {
  * to do benchmark comparisions on PR from feat1 -> feat2.
  *
  * In history you can ONLY track a single branch, which should be the main branch.
- *
  */
+export interface IHistoryProvider {
+  readLatestInBranch(branch: string): Promise<Benchmark | null>;
+  writeLatestInBranch(branch: string, benchmark: Benchmark): Promise<void>;
+  readHistory(): Promise<Benchmark[]>;
+  readHistoryCommit(commitSha: string): Promise<Benchmark | null>;
+  writeToHistory(data: Benchmark): Promise<void>;
+}

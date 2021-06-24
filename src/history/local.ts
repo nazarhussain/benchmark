@@ -2,15 +2,27 @@ import fs from "fs";
 import path from "path";
 import {IHistoryProvider} from "./provider";
 import {Benchmark, BenchmarkResults} from "../types";
-import {readCsv, writeCsv} from "../utils/file";
+import {fromCsv, toCsv} from "../utils/file";
 
 const extension = ".csv";
+const historyDir = "history";
+const latestDir = "latest";
+
+interface CsvMeta {
+  commit: string;
+}
 
 /**
  * Persist results in CSV, one benchmark result per file
  *
  * ```
- * /$dirpath/52b8122daa9b7a3d0ea0ecfc1ff9eda79a201eb8.csv
+ * /$dirpath/
+ *   history/
+ *     52b8122daa9b7a3d0ea0ecfc1ff9eda79a201eb8.csv
+ *     c0203c527c9a2269f1f289fad2c8e25afdc2c169.csv
+ *   latest/
+ *     main.csv
+ *     dev.csv
  * ```
  *
  * ```csv
@@ -22,34 +34,74 @@ const extension = ".csv";
 export class LocalHistoryProvider implements IHistoryProvider {
   constructor(private readonly dirpath: string) {}
 
-  async listCommits(): Promise<string[]> {
+  async readLatestInBranch(branch: string): Promise<Benchmark | null> {
+    const filepath = this.getLatestInBranchFilepath(branch);
+    return this.readBenchFileIfExists(filepath);
+  }
+
+  async writeLatestInBranch(branch: string, benchmark: Benchmark): Promise<void> {
+    const filepath = this.getLatestInBranchFilepath(branch);
+    this.writeBenchFile(filepath, benchmark);
+  }
+
+  async readHistory(): Promise<Benchmark[]> {
+    const historyDirpath = this.getHistoryDirpath();
+    let files: string[];
     try {
-      return fs.readdirSync(this.dirpath).map((file) => {
-        if (file.endsWith(extension)) return file.slice(0, -extension.length);
-        else return file;
-      });
+      files = fs.readdirSync(historyDirpath);
     } catch (e) {
       if (e.code === "ENOENT") return [];
       else throw e;
     }
+
+    return files.map((file) => this.readBenchFile(path.join(historyDirpath, file)));
   }
 
-  async readCommit(commitSha: string): Promise<Benchmark | null> {
+  async readHistoryCommit(commitSha: string): Promise<Benchmark | null> {
+    const filepath = this.getHistoryCommitPath(commitSha);
+    return this.readBenchFileIfExists(filepath);
+  }
+
+  async writeToHistory(benchmark: Benchmark): Promise<void> {
+    const filepath = this.getHistoryCommitPath(benchmark.commitSha);
+    this.writeBenchFile(filepath, benchmark);
+  }
+
+  private readBenchFileIfExists(filepath: string): Benchmark | null {
     try {
-      const results = readCsv<BenchmarkResults>(this.getFilepath(commitSha));
-      return {commitSha, results};
+      return this.readBenchFileIfExists(filepath);
     } catch (e) {
       if (e.code === "ENOENT") return null;
       else throw e;
     }
   }
 
-  async writeCommit(data: Benchmark): Promise<void> {
-    fs.mkdirSync(this.dirpath, {recursive: true});
-    writeCsv<BenchmarkResults>(this.getFilepath(data.commitSha), data.results);
+  /** Read result from CSV + metadata as Embedded Metadata */
+  private readBenchFile(filepath: string): Benchmark {
+    const str = fs.readFileSync(filepath, "utf8");
+    const {data, metadata} = fromCsv<BenchmarkResults>(str);
+    const csvMeta = metadata as unknown as CsvMeta;
+    return {commitSha: csvMeta.commit, results: data};
   }
 
-  private getFilepath(commitSha: string): string {
-    return path.join(this.dirpath, commitSha) + extension;
+  /** Write result to CSV + metadata as Embedded Metadata */
+  private writeBenchFile(filepath: string, benchmark: Benchmark): void {
+    const csvMeta: CsvMeta = {commit: benchmark.commitSha};
+    const str = toCsv(benchmark.results, csvMeta as unknown as Record<string, string>);
+
+    fs.mkdirSync(path.dirname(filepath), {recursive: true});
+    fs.writeFileSync(filepath, str);
+  }
+
+  private getLatestInBranchFilepath(branch: string): string {
+    return path.join(this.dirpath, latestDir, branch) + extension;
+  }
+
+  private getHistoryCommitPath(commitSha: string): string {
+    return path.join(this.getHistoryDirpath(), commitSha) + extension;
+  }
+
+  private getHistoryDirpath(): string {
+    return path.join(this.dirpath, historyDir);
   }
 }

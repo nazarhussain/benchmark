@@ -1,13 +1,6 @@
 import * as github from "@actions/github";
-import {Benchmark, BenchmarkHistory, Opts} from "../types";
-import {
-  getGithubEventData,
-  GithubActionsEventData,
-  parseBranchFromRef,
-  getDefaultBranch,
-  getBranchLatestCommit,
-  getBranchCommitList,
-} from "../utils";
+import {Benchmark, Opts} from "../types";
+import {getGithubEventData, GithubActionsEventData, parseBranchFromRef, getDefaultBranch} from "../utils";
 import {isGaRun} from "../github/context";
 import {IHistoryProvider} from "../history/provider";
 import {validateBenchmarkResults} from "../history/schema";
@@ -41,27 +34,11 @@ export async function resolvePrevBenchmark(
 ): Promise<Benchmark | null> {
   switch (compareWith.type) {
     case CompareWithType.exactCommit:
-      return await provider.readCommit(compareWith.commitSha);
+      return await provider.readHistoryCommit(compareWith.commitSha);
 
     case CompareWithType.latestCommitInBranch: {
       // Try first latest commit in branch
-      const latestCommitSha = await getBranchLatestCommit(compareWith.branch);
-      const latestCommit = await provider.readCommit(latestCommitSha);
-      if (latestCommit) return latestCommit;
-
-      // List some commits in branch and look for matches
-      const branchCommits = await getBranchCommitList(compareWith.branch, COMMIT_COUNT_LOOKBACK);
-      const commitsWithBenchArr = await provider.listCommits();
-      const commitsWithBenchSet = new Set(commitsWithBenchArr);
-      for (const commitSha of branchCommits) {
-        if (commitsWithBenchSet.has(commitSha)) {
-          return await provider.readCommit(commitSha);
-        }
-      }
-
-      // TODO: Try something else?
-
-      return null;
+      return await provider.readLatestInBranch(compareWith.branch);
     }
   }
 }
