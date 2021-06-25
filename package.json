@@ -1,6 +1,6 @@
 {
   "name": "@dapplion/benchmark",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "main": "lib/index.js",
   "repository": "git@github.com:dapplion/benchmark.git",
   "author": "dapplion <35266934+dapplion@users.noreply.github.com>",
@@ -8,10 +8,18 @@
   "bin": {
     "benchmark": "lib/cli.js"
   },
+  "files": [
+    "lib/**/*.d.ts",
+    "lib/**/*.js",
+    "lib/**/*.js.map",
+    "*.d.ts",
+    "*.js"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "test": "mocha test/**/*.test.ts",
     "lint": "eslint --color --ext .ts src/ test/",
+    "prepublishOnly": "yarn build",
     "benchmark": "node -r ts-node/register src/cli.ts 'test/**/*.perf.ts'"
   },
   "devDependencies": {
