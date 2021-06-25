@@ -1,63 +1,6 @@
 import fs from "fs";
 
 /**
- * Returns Github Actions context.
- * From https://github.com/actions/toolkit/blob/c861dd8859fe5294289fcada363ce9bc71e9d260/packages/github/src/context.ts#L25
- */
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export function getGithubContext() {
-  return {
-    // The name of the webhook event that triggered the workflow.
-    eventName: process.env.GITHUB_EVENT_NAME as GithubWebhookEvent,
-    // The commit SHA that triggered the workflow. For example,
-    // ffac537e6cbbf934b08745a378932722df287a53.
-    sha: process.env.GITHUB_SHA as string,
-    // The branch or tag ref that triggered the workflow.
-    // For example, refs/heads/feature-branch-1. If neither a branch or
-    // tag is available for the event type, the variable will not exist.
-    ref: process.env.GITHUB_REF as string,
-    // The name of the person or app that initiated the workflow. For example, octocat.
-    actor: process.env.GITHUB_ACTOR as string,
-    // The name of the workflow.
-    workflow: process.env.GITHUB_WORKFLOW as string,
-    // The unique identifier (id) of the action.
-    action: process.env.GITHUB_ACTION as string,
-    job: process.env.GITHUB_JOB as string,
-    runNumber: parseInt(process.env.GITHUB_RUN_NUMBER as string, 10),
-    runId: parseInt(process.env.GITHUB_RUN_ID as string, 10),
-  };
-}
-
-type GithubWebhookEvent =
-  | "check_run"
-  | "check_suite"
-  | "create"
-  | "delete"
-  | "deployment"
-  | "deployment_status"
-  | "fork"
-  | "gollum"
-  | "issue_comment"
-  | "issues"
-  | "label"
-  | "milestone"
-  | "page_build"
-  | "project"
-  | "project_card"
-  | "project_column"
-  | "public"
-  | "pull_request"
-  | "pull_request_review"
-  | "pull_request_review_comment"
-  | "pull_request_target"
-  | "push"
-  | "registry_package"
-  | "release"
-  | "status"
-  | "watch"
-  | "workflow_run";
-
-/**
  * Github actions store the event data payload at a JSON file with path
  * process.env.GITHUB_EVENT_PATH
  *
@@ -82,7 +25,7 @@ export function getGithubEventData<T>(): T {
     throw Error("Not in a Github Actions context, no GITHUB_EVENT_PATH");
   }
 
-  return JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH, "utf8"));
+  return JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH, "utf8")) as T;
 }
 
 export interface GithubActionsEventData {

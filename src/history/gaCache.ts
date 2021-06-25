@@ -24,13 +24,13 @@ export function getGaCacheHistoryProvider(cacheKey: string): IHistoryProvider {
 
 class GaCacheHistoryProvider extends LocalHistoryProvider implements IHistoryProvider {
   readonly type = HistoryProviderType.GaCache;
-  private initializePromise: Promise<any> | null = null;
+  private initializePromise: Promise<unknown> | null = null;
 
   constructor(private readonly tmpDir: string, private readonly cacheKey: string) {
     super(tmpDir);
   }
 
-  providerInfo() {
+  providerInfo(): string {
     return `GaCacheHistoryProvider: cacheKey ${this.cacheKey}`;
   }
 
@@ -59,7 +59,7 @@ class GaCacheHistoryProvider extends LocalHistoryProvider implements IHistoryPro
     await this.persist();
   }
 
-  private async initialize(): Promise<void> {
+  private async initialize(): Promise<unknown> {
     console.log("ENV", process.env);
     if (this.initializePromise === null) {
       this.initializePromise = cache.restoreCache([this.tmpDir], this.cacheKey);

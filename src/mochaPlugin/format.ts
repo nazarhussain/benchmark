@@ -49,8 +49,6 @@ export function formatResultRow(
   // Scalar multiplication G1 (255-bit, constant-time)                              7219.330 ops/s       138517 ns/op
   // Scalar multiplication G2 (255-bit, constant-time)                              3133.117 ops/s       319171 ns/op
 
-  const ratio = prevResult ? result.averageNs / prevResult.averageNs : null;
-
   const [averageTime, timeUnit] = prettyTime(averageNs);
   const row = [
     `${opsPerSec.toPrecision(precision).padStart(11)} ops/s`,

@@ -9,8 +9,9 @@
     "benchmark": "lib/cli.js"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -p tsconfig.build.json",
     "test": "mocha test/**/*.test.ts",
+    "lint": "eslint --color --ext .ts src/ test/",
     "benchmark": "node -r ts-node/register src/cli.ts 'test/**/*.perf.ts'"
   },
   "devDependencies": {
@@ -19,9 +20,15 @@
     "@types/node": "^15.12.4",
     "@types/rimraf": "^3.0.0",
     "@types/yargs": "^17.0.0",
+    "@typescript-eslint/eslint-plugin": "^4.28.0",
+    "@typescript-eslint/parser": "^4.28.0",
     "chai": "^4.3.4",
     "dotenv": "^10.0.0",
+    "eslint": "^7.29.0",
+    "eslint-plugin-import": "^2.23.4",
+    "eslint-plugin-prettier": "^3.4.0",
     "mocha": "^9.0.1",
+    "prettier": "^2.3.1",
     "rimraf": "^3.0.2",
     "ts-node": "^10.0.0",
     "typescript": "^4.3.4"

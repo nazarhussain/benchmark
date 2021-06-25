@@ -9,9 +9,10 @@ import {runMochaBenchmark} from "./mochaPlugin/mochaRunner";
 import {computeBenchComparision} from "./compare/compute";
 import {postGaComment} from "./github/comment";
 import {isGaRun} from "./github/context";
-import {HistoryProviderType} from "./history/provider";
 
-export async function run(opts: Opts) {
+/* eslint-disable no-console */
+
+export async function run(opts: Opts): Promise<void> {
   // Retrieve history
   const historyProvider = getHistoryProvider(opts);
   console.log(`Connected to historyProvider: ${historyProvider.providerInfo()}`);

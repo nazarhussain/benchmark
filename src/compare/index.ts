@@ -5,9 +5,6 @@ import {isGaRun} from "../github/context";
 import {IHistoryProvider} from "../history/provider";
 import {validateBenchmark} from "../history/schema";
 
-/** Number of commits to consider when finding benchmark data on a branch */
-const COMMIT_COUNT_LOOKBACK = 100;
-
 enum CompareWithType {
   latestCommitInBranch = "latestCommitInBranch",
   exactCommit = "exactCommit",

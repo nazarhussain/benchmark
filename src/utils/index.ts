@@ -1,5 +1,6 @@
 export * from "./currentBranch";
 export * from "./defaultBranch";
+export * from "./error";
 export * from "./file";
 export * from "./gaContext";
 export * from "./git";

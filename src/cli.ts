@@ -13,7 +13,7 @@ const argv = process.argv.slice(2);
 
 const args = loadOptions(argv);
 
-yargs
+void yargs
   .env("BENCHMARK")
   .scriptName("benchmark")
   .command({
@@ -38,7 +38,7 @@ yargs
   benchmark --local 'test/**/*.perf.ts'
 `
   )
-  .epilogue(`For more information, check the CLI reference _TBD_`)
+  .epilogue("For more information, check the CLI reference _TBD_")
   .alias("h", "help")
   .alias("v", "version")
   .recommendCommands()

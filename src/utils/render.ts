@@ -42,7 +42,7 @@ ${renderBenchmarkTable(benchComp.results, benchComp)}
 `;
 }
 
-function renderBenchmarkTable(benchComp: ResultComparision[], {currCommitSha, prevCommitSha}: CommitsSha) {
+function renderBenchmarkTable(benchComp: ResultComparision[], {currCommitSha, prevCommitSha}: CommitsSha): string {
   function toRow(arr: (number | string)[]): string {
     const row = arr.map((e) => `\`${e}\``).join(" | ");
     return `| ${row} |`;
@@ -64,7 +64,7 @@ ${rows.join("\n")}
 `;
 }
 
-function prettyTimeStr(nanoSec: number) {
+function prettyTimeStr(nanoSec: number): string {
   const [value, unit] = prettyTime(nanoSec);
   return `${value.toPrecision(5)} ${unit}`;
 }

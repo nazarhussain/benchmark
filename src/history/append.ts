@@ -11,7 +11,8 @@ export function appendBenchmarkToHistoryAndPrune(
   }
 
   if (opts.prune) {
-    pruneHistoryCommits(history);
+    // Prune commits not in current git history
+    // TODO
   }
 
   addBenchmarkToHistory(history, newBench, branch);
@@ -27,13 +28,6 @@ function limitBenchmarksPerBranch(history: BenchmarkHistory, benchmarksPerBranch
       branchBenchmarks.splice(0, deleteCount);
     }
   }
-}
-
-/**
- * Prune commits not in current git history
- */
-function pruneHistoryCommits(history: BenchmarkHistory): void {
-  // TODO
 }
 
 function addBenchmarkToHistory(history: BenchmarkHistory, newBench: Benchmark, branch: string): void {

@@ -16,7 +16,7 @@ describe("Array iteration", () => {
   });
 
   // nonce = 5
-  let n = 1e6;
+  const n = 1e6;
   const arr = Array.from({length: n}, (_, i) => i);
 
   itBench("sum array with raw for loop", () => {
@@ -24,6 +24,7 @@ describe("Array iteration", () => {
     for (let i = 0, len = arr.length; i < len; i++) {
       sum += i;
     }
+    sum;
   });
 
   itBench("sum array with reduce", () => {

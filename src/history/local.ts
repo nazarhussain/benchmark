@@ -3,6 +3,7 @@ import path from "path";
 import {HistoryProviderType, IHistoryProvider} from "./provider";
 import {Benchmark, BenchmarkResults} from "../types";
 import {fromCsv, toCsv} from "../utils/file";
+import {FsError} from "../utils";
 
 const extension = ".csv";
 const historyDir = "history";
@@ -35,7 +36,7 @@ export class LocalHistoryProvider implements IHistoryProvider {
   readonly type: HistoryProviderType = HistoryProviderType.Local;
   constructor(private readonly dirpath: string) {}
 
-  providerInfo() {
+  providerInfo(): string {
     return `LocalHistoryProvider, dirpath ${this.dirpath}`;
   }
 
@@ -55,7 +56,7 @@ export class LocalHistoryProvider implements IHistoryProvider {
     try {
       files = fs.readdirSync(historyDirpath);
     } catch (e) {
-      if (e.code === "ENOENT") return [];
+      if ((e as FsError).code === "ENOENT") return [];
       else throw e;
     }
 
@@ -76,7 +77,7 @@ export class LocalHistoryProvider implements IHistoryProvider {
     try {
       return this.readBenchFile(filepath);
     } catch (e) {
-      if (e.code === "ENOENT") return null;
+      if ((e as FsError).code === "ENOENT") return null;
       else throw e;
     }
   }

@@ -53,22 +53,3 @@ export type ResultComparision = {
   isFailed: boolean;
   isImproved: boolean;
 };
-
-/** Github API type */
-type GitHubUser = {
-  email?: string;
-  name: string;
-  username: string;
-};
-
-/** Github API type */
-type Commit = {
-  author: GitHubUser;
-  committer: GitHubUser;
-  distinct?: unknown; // Unused
-  id: string;
-  message: string;
-  timestamp: string;
-  tree_id?: unknown; // Unused
-  url: string;
-};

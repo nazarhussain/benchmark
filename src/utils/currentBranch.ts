@@ -1,5 +1,5 @@
 import * as github from "@actions/github";
-import {getGithubEventData, GithubActionsEventData, parseBranchFromRef, getDefaultBranch} from "../utils";
+import {getGithubEventData, GithubActionsEventData, parseBranchFromRef} from "../utils";
 import {isGaRun} from "../github/context";
 import {shell} from "./shell";
 

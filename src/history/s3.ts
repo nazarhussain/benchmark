@@ -1,7 +1,7 @@
 import path from "path";
 import S3 from "aws-sdk/clients/s3";
 import {Benchmark, BenchmarkResults} from "../types";
-import {fromCsv, toCsv} from "../utils";
+import {fromCsv, toCsv, extendError, AwsError} from "../utils";
 import {HistoryProviderType, IHistoryProvider} from "./provider";
 
 export type S3Config = Pick<S3.Types.ClientConfiguration, "accessKeyId" | "secretAccessKey" | "region" | "endpoint"> & {
@@ -23,10 +23,6 @@ export class S3HistoryProvider implements IHistoryProvider {
 
   constructor(private readonly config: S3Config) {
     this.s3 = new S3(config);
-  }
-
-  providerInfo() {
-    return `S3HistoryProvider, Bucket ${this.config.Bucket}`;
   }
 
   /**
@@ -65,7 +61,20 @@ export class S3HistoryProvider implements IHistoryProvider {
     });
   }
 
+  providerInfo(): string {
+    return `S3HistoryProvider, Bucket ${this.config.Bucket}`;
+  }
+
   async readLatestInBranch(branch: string): Promise<Benchmark | null> {
+    // TEMP TEMP
+    const objects = await this.s3
+      .listObjects({
+        Bucket: this.config.Bucket,
+      })
+      .promise();
+
+    console.log("READING OBJECTS", objects);
+
     const key = this.getLatestInBranchKey(branch);
     return await this.readBenchFileIfExists(key);
   }
@@ -84,8 +93,7 @@ export class S3HistoryProvider implements IHistoryProvider {
       })
       .promise()
       .catch((e) => {
-        e.message = `Error on listObjects: ${e.message}`;
-        throw e;
+        throw extendError(e, "Error on listObjects");
       });
 
     if (!objects.Contents) {
@@ -118,7 +126,7 @@ export class S3HistoryProvider implements IHistoryProvider {
     } catch (e) {
       // Found with trial an error
       // NoSuchKey: Error on getObject latest/main: null
-      if (e.code === "NoSuchKey") {
+      if ((e as AwsError).code === "NoSuchKey") {
         return null;
       } else {
         throw e;
@@ -134,8 +142,7 @@ export class S3HistoryProvider implements IHistoryProvider {
       })
       .promise()
       .catch((e) => {
-        e.message = `Error on getObject ${key}: ${e.message}`;
-        throw e;
+        throw extendError(e as Error, `Error on getObject ${key}`);
       });
 
     if (!res.Body) {
@@ -168,8 +175,7 @@ export class S3HistoryProvider implements IHistoryProvider {
       })
       .promise()
       .catch((e) => {
-        e.message = `Error on upload ${key}: ${e.message}`;
-        throw e;
+        throw extendError(e as Error, `Error on upload ${key}`);
       });
   }
 
