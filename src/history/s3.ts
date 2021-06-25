@@ -67,12 +67,12 @@ export class S3HistoryProvider implements IHistoryProvider {
 
   async readLatestInBranch(branch: string): Promise<Benchmark | null> {
     const key = this.getLatestInBranchKey(branch);
-    return this.readBenchFileIfExists(key);
+    return await this.readBenchFileIfExists(key);
   }
 
   async writeLatestInBranch(branch: string, benchmark: Benchmark): Promise<void> {
     const key = this.getLatestInBranchKey(branch);
-    this.writeBenchFile(key, benchmark);
+    await this.writeBenchFile(key, benchmark);
   }
 
   async readHistory(maxItems = MAX_ITEMS_TO_LIST): Promise<Benchmark[]> {
@@ -104,12 +104,12 @@ export class S3HistoryProvider implements IHistoryProvider {
 
   async readHistoryCommit(commitSha: string): Promise<Benchmark | null> {
     const key = this.getHistoryCommitKey(commitSha);
-    return this.readBenchFileIfExists(key);
+    return await this.readBenchFileIfExists(key);
   }
 
   async writeToHistory(benchmark: Benchmark): Promise<void> {
     const key = this.getHistoryCommitKey(benchmark.commitSha);
-    this.writeBenchFile(key, benchmark);
+    await this.writeBenchFile(key, benchmark);
   }
 
   private async readBenchFileIfExists(key: string): Promise<Benchmark | null> {
