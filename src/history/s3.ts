@@ -26,8 +26,7 @@ export class S3HistoryProvider implements IHistoryProvider {
   }
 
   providerInfo() {
-    const info = {Bucket: this.config.Bucket, region: this.config.region};
-    return `S3HistoryProvider: ${JSON.stringify(info, null, 2)}`;
+    return `S3HistoryProvider, Bucket ${this.config.Bucket}`;
   }
 
   /**

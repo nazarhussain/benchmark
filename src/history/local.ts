@@ -36,8 +36,7 @@ export class LocalHistoryProvider implements IHistoryProvider {
   constructor(private readonly dirpath: string) {}
 
   providerInfo() {
-    const info = {dirpath: this.dirpath};
-    return `LocalHistoryProvider: ${JSON.stringify(info, null, 2)}`;
+    return `LocalHistoryProvider, dirpath ${this.dirpath}`;
   }
 
   async readLatestInBranch(branch: string): Promise<Benchmark | null> {

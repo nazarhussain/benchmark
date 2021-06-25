@@ -1,7 +1,7 @@
 # Testing artifacts
 test_files*
-benchmark_history.json
-benchmark_history/
+benchmark_data.json
+benchmark_data/
 
 # Build
 lib/

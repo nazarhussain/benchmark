@@ -174,7 +174,7 @@ Persist benchmark history in Github Actions cache. Requires Github authenticatio
 ```
 
 ```
---ga-cache benchmark_history
+--ga-cache benchmark_data
 ```
 
 # Flow overview

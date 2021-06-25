@@ -4,8 +4,8 @@ import {FileCollectionOptions} from "./utils/mochaCliExports";
 
 export const optionsDefault = {
   threshold: 2,
-  historyLocalPath: "./benchmark_history",
-  historyCacheKey: "benchmark_history",
+  historyLocalPath: "./benchmark_data",
+  historyCacheKey: "benchmark_data",
 };
 
 type ICliCommandOptions<OwnArgs> = Required<{[key in keyof OwnArgs]: Options}>;
