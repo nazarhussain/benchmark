@@ -6,6 +6,7 @@ import {HistoryProviderType, IHistoryProvider} from "./provider";
 
 export type S3Config = Pick<S3.Types.ClientConfiguration, "accessKeyId" | "secretAccessKey" | "region" | "endpoint"> & {
   Bucket: string;
+  keyPrefix: string;
 };
 
 const historyDir = "history";
@@ -44,9 +45,10 @@ export class S3HistoryProvider implements IHistoryProvider {
    * https://docs.aws.amazon.com/sdk-for-javascript/v2/developer-guide/loading-node-credentials-environment.html
    */
   static fromEnv(): S3HistoryProvider {
-    const {S3_ACCESS_KEY, S3_SECRET_KEY, S3_REGION, S3_BUCKET, S3_ENDPOINT} = process.env;
+    const {S3_ACCESS_KEY, S3_SECRET_KEY, S3_REGION, S3_BUCKET, S3_ENDPOINT, S3_KEY_PREFIX} = process.env;
 
     if (!S3_BUCKET) throw Error("No ENV S3_BUCKET");
+    if (!S3_KEY_PREFIX) throw Error("No ENV S3_KEY_PREFIX");
     // S3_ACCESS_KEY is optional
     // S3_SECRET_KEY is optional
     // S3_REGION is optional
@@ -58,6 +60,7 @@ export class S3HistoryProvider implements IHistoryProvider {
       region: ifSet(S3_REGION),
       Bucket: S3_BUCKET,
       endpoint: ifSet(S3_ENDPOINT),
+      keyPrefix: S3_KEY_PREFIX,
     });
   }
 
@@ -66,15 +69,6 @@ export class S3HistoryProvider implements IHistoryProvider {
   }
 
   async readLatestInBranch(branch: string): Promise<Benchmark | null> {
-    // TEMP TEMP
-    const objects = await this.s3
-      .listObjects({
-        Bucket: this.config.Bucket,
-      })
-      .promise();
-
-    console.log("READING OBJECTS", objects);
-
     const key = this.getLatestInBranchKey(branch);
     return await this.readBenchFileIfExists(key);
   }
@@ -87,7 +81,7 @@ export class S3HistoryProvider implements IHistoryProvider {
   async readHistory(maxItems = MAX_ITEMS_TO_LIST): Promise<Benchmark[]> {
     const objects = await this.s3
       .listObjects({
-        Prefix: historyDir,
+        Prefix: this.getHistoryDir(),
         Bucket: this.config.Bucket,
         MaxKeys: maxItems,
       })
@@ -184,7 +178,11 @@ export class S3HistoryProvider implements IHistoryProvider {
   }
 
   private getHistoryCommitKey(commitSha: string): string {
-    return path.join(historyDir, commitSha);
+    return path.join(this.getHistoryDir(), commitSha);
+  }
+
+  private getHistoryDir(): string {
+    return path.join(this.config.keyPrefix, historyDir);
   }
 }
 

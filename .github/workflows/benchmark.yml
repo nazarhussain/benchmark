@@ -119,3 +119,5 @@ jobs:
           S3_REGION: ${{ secrets.S3_REGION }}
           S3_BUCKET: ${{ secrets.S3_BUCKET }}
           S3_ENDPOINT: ${{ secrets.S3_ENDPOINT }}
+          # Key prefix to separate benchmark data from multiple repositories
+          S3_KEY_PREFIX: ${{ github.repository }}/${{ runner.os }}
