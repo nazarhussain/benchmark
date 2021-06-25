@@ -66,7 +66,7 @@ ${rows.join("\n")}
 
 function prettyTimeStr(nanoSec: number): string {
   const [value, unit] = prettyTime(nanoSec);
-  return `${value.toPrecision(5)} ${unit}`;
+  return `${value.toPrecision(5)} ${unit}/op`;
 }
 
 function prettyTime(nanoSec: number): [number, string] {
