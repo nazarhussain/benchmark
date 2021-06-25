@@ -1,7 +1,8 @@
 import fs from "fs";
 import path from "path";
-import {resultsByRootSuite, testResults} from "./globalState";
+import {resultsByRootSuite} from "./globalState";
 import {BenchmarkOpts, BenchmarkRunOptsWithFn, runBenchFn} from "./runBenchFn";
+import {getRootSuite, getParentSuite} from "./utils";
 
 /**
  * Map to persist options set in describe blocks
@@ -47,6 +48,11 @@ export function itBench<T>(
     const results = resultsByRootSuite.get(rootSuite);
     if (!results) throw Error("root suite not found");
 
+    // Ensure bench id is unique
+    if (results.has(opts.id)) {
+      throw Error(`test titles must be unique, duplicated: '${opts.id}'`);
+    }
+
     // Extend timeout if maxMs is set
     const timeout = this.timeout();
     if (opts.maxMs && opts.maxMs > timeout) {
@@ -57,13 +63,10 @@ export function itBench<T>(
 
     const {result, runsNs} = await runBenchFn(opts);
 
-    // Store result to persist to file latter
-    results.push(result);
-
-    // Store temp results for the custom reporter
-    const test = this.currentTest ?? this.test;
-    if (!test) throw Error("this context has not 'test' object");
-    testResults.set(test, result);
+    // Store result for:
+    // - to persist benchmark data latter
+    // - to render with the custom reporter
+    results.set(opts.id, result);
 
     // Persist full results if requested. dir is created in `beforeAll`
     const benchmarkResultsCsvDir = process.env.BENCHMARK_RESULTS_CSV_DIR;
@@ -133,16 +136,4 @@ function getOptsFromSuite(suite: Mocha.Suite, optsArr: BenchmarkOpts[]): void {
   if (suite.parent) {
     getOptsFromSuite(suite.parent, optsArr);
   }
-}
-
-function getParentSuite(ctx: Mocha.Context): Mocha.Suite {
-  const test = ctx.currentTest ?? ctx.test;
-  if (!test) throw Error("this.test not set");
-  if (!test.parent) throw Error("this.test.parent not set");
-  return test.parent;
-}
-
-function getRootSuite(suite: Mocha.Suite): Mocha.Suite {
-  if (!suite.parent) return suite;
-  return getRootSuite(suite.parent);
 }

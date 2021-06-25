@@ -1,8 +1,9 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import Mocha from "mocha";
 import {Benchmark, BenchmarkResult} from "../types";
-import {testResults} from "./globalState";
+import {resultsByRootSuite} from "./globalState";
 import {formatResultRow} from "./format";
+import {getRootSuite} from "./utils";
 
 const {
   EVENT_RUN_BEGIN,
@@ -64,19 +65,31 @@ export function benchmarkReporterWithPrev(prevBench: Benchmark | null, threshold
       });
 
       runner.on(EVENT_TEST_PASS, function (test) {
-        const result = testResults.get(test);
-        if (!result) {
-          const err = Error(`No testResult found for test: ${test.title}`);
+        try {
+          if (!test.parent) throw Error("test has no parent");
+          const rootSuite = getRootSuite(test.parent);
+          const results = resultsByRootSuite.get(rootSuite);
+          if (!results) throw Error("root suite not found");
+
+          const result = results.get(test.title);
+          if (result) {
+            // Render benchmark
+            const prevResult = prevResults.get(result.id) ?? null;
+
+            const resultRow = formatResultRow(result, prevResult, threshold);
+            const fmt = indent() + color("checkmark", "  " + symbols.ok) + " " + resultRow;
+            consoleLog(fmt);
+          } else {
+            // Render regular test
+            const fmt = indent() + color("checkmark", "  " + symbols.ok) + color("pass", " %s");
+            consoleLog(fmt, test.title);
+          }
+        } catch (e) {
           // Log error manually since mocha doesn't log errors thrown here
-          consoleLog(err);
-          throw err;
+          consoleLog(e);
+          process.exitCode = 1;
+          throw e;
         }
-
-        const prevResult = prevResults.get(result.id) ?? null;
-
-        const resultRow = formatResultRow(result, prevResult, threshold);
-        const fmt = indent() + color("checkmark", "  " + symbols.ok) + " " + resultRow;
-        consoleLog(fmt);
       });
 
       runner.on(EVENT_TEST_FAIL, function (test) {

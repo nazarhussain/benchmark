@@ -1,3 +1,4 @@
+import assert from "assert";
 import {itBench, setBenchOpts} from "../src";
 
 // As of Jun 17 2021
@@ -13,6 +14,10 @@ describe("Array iteration", () => {
     // This bench is very fast, with 1s it can do 300k runs
     minMs: 0.5 * 1000,
     runs: 128,
+  });
+
+  it("Regular test", () => {
+    assert.strictEqual(1 + 2, 3);
   });
 
   // nonce = 5
