@@ -49,9 +49,9 @@ export function renderCompareWith(compareWith: CompareWith): string {
 
     case CompareWithType.latestCommitInBranch: {
       if (compareWith.before) {
-        return `latestCommitInBranch '${compareWith.branch}'`;
-      } else {
         return `latestCommitInBranch '${compareWith.branch}' before commit ${compareWith.before}`;
+      } else {
+        return `latestCommitInBranch '${compareWith.branch}'`;
       }
     }
   }
