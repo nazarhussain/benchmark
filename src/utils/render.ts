@@ -44,7 +44,8 @@ ${renderBenchmarkTable(benchComp.results, benchComp)}
 
 function renderBenchmarkTable(benchComp: ResultComparision[], {currCommitSha, prevCommitSha}: CommitsSha): string {
   function toRow(arr: (number | string)[]): string {
-    const row = arr.map((e) => `\`${e}\``).join(" | ");
+    // Don't surround string items with \`, it doesn't look great rendered in Github comments
+    const row = arr.map((e) => `${e}`).join(" | ");
     return `| ${row} |`;
   }
 
