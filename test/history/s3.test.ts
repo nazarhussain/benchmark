@@ -5,13 +5,32 @@ import {S3HistoryProvider} from "../../src/history/s3";
 import dotenv from "dotenv";
 dotenv.config();
 
-// Currently fails with
-//
-// Error: reserveCache failed: Cache Service Url not found, unable to restore cache
-//
-// See:
-//  - https://github.com/nektos/act/issues/329
-//  - https://github.com/nektos/act/issues/285
+describe("benchmark history S3 paths", () => {
+  const Bucket = "myproject-benchmark-data";
+  const keyPrefix = "myorg/myproject/Linux";
+
+  let historyProvider: S3HistoryProvider;
+  before(() => {
+    historyProvider = new S3HistoryProvider({Bucket, keyPrefix});
+  });
+
+  it("getLatestInBranchKey", () => {
+    const branch = "master";
+    expect(historyProvider["getLatestInBranchKey"](branch)).to.equal("myorg/myproject/Linux/latest/master");
+  });
+
+  it("getHistoryCommitKey", () => {
+    const commit = "9de601df50796e6a4bdedfd1ba515bb8a02b71e8";
+    expect(historyProvider["getHistoryCommitKey"](commit)).to.equal(
+      "myorg/myproject/Linux/history/9de601df50796e6a4bdedfd1ba515bb8a02b71e8"
+    );
+  });
+
+  it("getHistoryDir", () => {
+    expect(historyProvider["getHistoryDir"]()).to.equal("myorg/myproject/Linux/history");
+  });
+});
+
 describe.skip("benchmark history S3", function () {
   this.timeout(60 * 1000);
 

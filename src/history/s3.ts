@@ -174,7 +174,7 @@ export class S3HistoryProvider implements IHistoryProvider {
   }
 
   private getLatestInBranchKey(branch: string): string {
-    return path.join(latestDir, branch);
+    return path.join(this.config.keyPrefix, latestDir, branch);
   }
 
   private getHistoryCommitKey(commitSha: string): string {
