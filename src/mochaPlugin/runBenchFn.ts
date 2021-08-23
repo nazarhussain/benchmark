@@ -8,6 +8,11 @@ export type BenchmarkOpts = {
   only?: boolean;
   skip?: boolean;
   timeout?: number;
+  // For reporter
+  /** Customize the threshold for this specific benchmark. Set to Infinity to disable it */
+  threshold?: number;
+  /** Equivalent to setting threshold = Infinity */
+  noThreshold?: boolean;
 };
 
 export type BenchmarkRunOpts = BenchmarkOpts & {
@@ -56,7 +61,13 @@ export async function runBenchFn<T, T2>(
   const averageNs = Number(average);
 
   return {
-    result: {id: opts.id, averageNs, runsDone: i - 1, totalMs: Date.now() - startRunMs},
+    result: {
+      id: opts.id,
+      averageNs,
+      runsDone: i - 1,
+      totalMs: Date.now() - startRunMs,
+      threshold: opts.noThreshold === true ? Infinity : opts.threshold,
+    },
     runsNs,
   };
 }

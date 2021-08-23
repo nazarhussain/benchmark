@@ -15,6 +15,7 @@ export function computeBenchComparision(
   const results = currBench.results.map((currBench): ResultComparision => {
     const {id} = currBench;
     const prevBench = prevResults.get(id);
+    const thresholdBench = currBench.threshold ?? threshold;
 
     if (prevBench) {
       const ratio = currBench.averageNs / prevBench.averageNs;
@@ -23,8 +24,8 @@ export function computeBenchComparision(
         currAverageNs: currBench.averageNs,
         prevAverageNs: prevBench.averageNs,
         ratio,
-        isFailed: ratio > threshold,
-        isImproved: ratio < 1 / threshold,
+        isFailed: ratio > thresholdBench,
+        isImproved: ratio < 1 / thresholdBench,
       };
     } else {
       return {

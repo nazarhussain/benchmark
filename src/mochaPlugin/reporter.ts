@@ -76,7 +76,7 @@ export function benchmarkReporterWithPrev(prevBench: Benchmark | null, threshold
             // Render benchmark
             const prevResult = prevResults.get(result.id) ?? null;
 
-            const resultRow = formatResultRow(result, prevResult, threshold);
+            const resultRow = formatResultRow(result, prevResult, result.threshold ?? threshold);
             const fmt = indent() + color("checkmark", "  " + symbols.ok) + " " + resultRow;
             consoleLog(fmt);
           } else {

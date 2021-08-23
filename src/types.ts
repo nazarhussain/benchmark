@@ -23,6 +23,8 @@ export type BenchmarkResult = {
   averageNs: number;
   runsDone: number;
   totalMs: number;
+  // For reporter
+  threshold: number | undefined;
 };
 
 /** Time results for a single benchmark (all items) */

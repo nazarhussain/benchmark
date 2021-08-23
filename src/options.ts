@@ -27,7 +27,8 @@ export const options: ICliCommandOptions<CliOpts> = {
     defaultDescription: "Infinity",
   },
   threshold: {
-    description: "Ratio of new average time per run vs previos time per run to consider a failure",
+    description:
+      "Ratio of new average time per run vs previos time per run to consider a failure. Set to 'Infinity' to disable it.",
     type: "number",
     default: optionsDefault.threshold,
   },
