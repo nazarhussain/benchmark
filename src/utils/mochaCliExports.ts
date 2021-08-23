@@ -36,4 +36,4 @@ export interface FileCollectionOptions {
 
 export const collectFiles = collectFilesMocha as (fileCollectParams: FileCollectionOptions) => string[];
 
-export const handleRequires = handleRequiresMocha as (requires?: string[]) => Promise<unknown>
+export const handleRequires = handleRequiresMocha as (requires?: string[]) => Promise<unknown>;

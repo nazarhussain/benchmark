@@ -2,7 +2,7 @@
 
 // Must not use `* as yargs`, see https://github.com/yargs/yargs/issues/1131
 import yargs from "yargs";
-import {loadOptions,handleRequires} from "./utils/mochaCliExports";
+import {loadOptions, handleRequires} from "./utils/mochaCliExports";
 import {options, optionsDefault} from "./options";
 import {run} from "./run";
 import {Opts} from "./types";
@@ -28,7 +28,7 @@ void yargs
       const plugins = await handleRequires(argv.require as string[]);
       Object.assign(argv, plugins);
 
-      await run({threshold: optionsDefault.threshold, ...argv} as Opts)
+      await run({threshold: optionsDefault.threshold, ...argv} as Opts);
     },
   })
 
