@@ -54,15 +54,17 @@ const itBenchFn: ItBenchFn = function itBench<T, T2>(
       }
     }
 
-    const {result, runsNs} = await runBenchFn(opts);
+    // Persist full results if requested. dir is created in `beforeAll`
+    const benchmarkResultsCsvDir = process.env.BENCHMARK_RESULTS_CSV_DIR;
+    const persistRunsNs = Boolean(benchmarkResultsCsvDir);
+
+    const {result, runsNs} = await runBenchFn(opts, persistRunsNs);
 
     // Store result for:
     // - to persist benchmark data latter
     // - to render with the custom reporter
     results.set(opts.id, result);
 
-    // Persist full results if requested. dir is created in `beforeAll`
-    const benchmarkResultsCsvDir = process.env.BENCHMARK_RESULTS_CSV_DIR;
     if (benchmarkResultsCsvDir) {
       fs.mkdirSync(benchmarkResultsCsvDir, {recursive: true});
       const filename = `${result.id}.csv`;

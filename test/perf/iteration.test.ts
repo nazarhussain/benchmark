@@ -9,12 +9,7 @@ import {itBench, setBenchOpts} from "../../src";
 // byteArrayEquals with valueOf()                                         853971.0 ops/s      1.171000 us/op 9963051 runs    16.07 s
 
 describe("Array iteration", () => {
-  setBenchOpts({
-    maxMs: 60 * 1000,
-    // This bench is very fast, with 1s it can do 300k runs
-    minMs: 0.5 * 1000,
-    runs: 128,
-  });
+  setBenchOpts({maxMs: 60 * 1000, convergeFactor: 0.1 / 100});
 
   it("Regular test", () => {
     assert.strictEqual(1 + 2, 3);
