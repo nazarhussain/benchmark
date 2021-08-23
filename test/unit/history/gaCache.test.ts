@@ -16,7 +16,7 @@ describe.skip("benchmark history gaCache", function () {
   const branch = "main";
   const benchmark: Benchmark = {
     commitSha: "010101010101010101010101",
-    results: [{id: "for loop", averageNs: 16573, runsDone: 1024, totalMs: 465}],
+    results: [{id: "for loop", averageNs: 16573, runsDone: 1024, totalMs: 465, threshold: 2}],
   };
 
   const cacheKey = "ga-cache-testing";

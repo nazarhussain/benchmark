@@ -76,4 +76,22 @@ describe("Array iteration", () => {
   // itBench.only("sum array with reduce", () => {
   //   arr.reduce((total, curr) => total + curr, 0);
   // });
+
+  // Reporter options
+
+  itBench({
+    id: "sum array with reduce high threshold",
+    threshold: 5,
+    fn: () => {
+      arr.reduce((total, curr) => total + curr, 0);
+    },
+  });
+
+  itBench({
+    id: "sum array with reduce no threshold",
+    threshold: Infinity,
+    fn: () => {
+      arr.reduce((total, curr) => total + curr, 0);
+    },
+  });
 });

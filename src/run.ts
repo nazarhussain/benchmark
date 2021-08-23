@@ -13,6 +13,9 @@ import {isGaRun} from "./github/context";
 /* eslint-disable no-console */
 
 export async function run(opts: Opts): Promise<void> {
+  // Sanitize opts
+  if (isNaN(opts.threshold)) throw Error("opts.threshold is not a number");
+
   // Retrieve history
   const historyProvider = getHistoryProvider(opts);
   console.log(`Connected to historyProvider: ${historyProvider.providerInfo()}`);
