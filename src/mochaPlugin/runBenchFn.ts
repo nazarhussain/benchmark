@@ -10,18 +10,15 @@ export type BenchmarkRunOpts = BenchmarkOpts & {
   id: string;
 };
 
-export type BenchmarkRunOptsWithFn<T> = BenchmarkOpts & {
+export type BenchmarkRunOptsWithFn<T, T2> = BenchmarkOpts & {
   id: string;
   fn: (arg: T) => void | Promise<void>;
-  beforeEach?: (i: number) => T | Promise<T>;
+  before?: () => T2 | Promise<T2>;
+  beforeEach?: (arg: T2, i: number) => T | Promise<T>;
 };
 
-export type BenchmarkResultDetail = {
-  runsNs: bigint[];
-};
-
-export async function runBenchFn<T>(
-  opts: BenchmarkRunOptsWithFn<T>
+export async function runBenchFn<T, T2>(
+  opts: BenchmarkRunOptsWithFn<T, T2>
 ): Promise<{result: BenchmarkResult; runsNs: bigint[]}> {
   const runs = opts.runs || 512;
   const maxMs = opts.maxMs || 2000;
@@ -31,6 +28,9 @@ export async function runBenchFn<T>(
 
   const startRunMs = Date.now();
   let i = 0;
+
+  const inputAll = opts.before ? await opts.before() : (undefined as unknown as T2);
+
   // eslint-disable-next-line no-constant-condition
   while (true) {
     const ellapsedMs = Date.now() - startRunMs;
@@ -39,7 +39,7 @@ export async function runBenchFn<T>(
     // Exceeds target runs + min time
     if (i++ >= runs && ellapsedMs > minMs) break;
 
-    const input = opts.beforeEach ? await opts.beforeEach(i) : (undefined as unknown as T);
+    const input = opts.beforeEach ? await opts.beforeEach(inputAll, i) : (undefined as unknown as T);
 
     const startNs = process.hrtime.bigint();
     await opts.fn(input);

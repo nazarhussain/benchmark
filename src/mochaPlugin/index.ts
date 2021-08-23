@@ -11,10 +11,13 @@ const optsMap = new Map<Mocha.Suite, BenchmarkOpts>();
 
 type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
-export function itBench<T>(opts: BenchmarkRunOptsWithFn<T>): void;
-export function itBench<T>(idOrOpts: string | Omit<BenchmarkRunOptsWithFn<T>, "fn">, fn: (arg: T) => void): void;
-export function itBench<T>(
-  idOrOpts: string | PartialBy<BenchmarkRunOptsWithFn<T>, "fn">,
+export function itBench<T, T2>(opts: BenchmarkRunOptsWithFn<T, T2>): void;
+export function itBench<T, T2>(
+  idOrOpts: string | Omit<BenchmarkRunOptsWithFn<T, T2>, "fn">,
+  fn: (arg: T) => void
+): void;
+export function itBench<T, T2>(
+  idOrOpts: string | PartialBy<BenchmarkRunOptsWithFn<T, T2>, "fn">,
   fn?: (arg: T) => void | Promise<void>
 ): void {
   // TODO:
@@ -24,7 +27,7 @@ export function itBench<T>(
   // if (this.averageNs === null) this.averageNs = result.averageNs;
   // result.factor = result.averageNs / this.averageNs;
 
-  let opts: BenchmarkRunOptsWithFn<T>;
+  let opts: BenchmarkRunOptsWithFn<T, T2>;
   if (typeof idOrOpts === "string") {
     if (!fn) throw Error("fn arg must be set");
     opts = {id: idOrOpts, fn};
@@ -32,7 +35,7 @@ export function itBench<T>(
     if (fn) {
       opts = {...idOrOpts, fn};
     } else {
-      const optsWithFn = idOrOpts as BenchmarkRunOptsWithFn<T>;
+      const optsWithFn = idOrOpts as BenchmarkRunOptsWithFn<T, T2>;
       if (!optsWithFn.fn) throw Error("opts.fn arg must be set");
       opts = optsWithFn;
     }

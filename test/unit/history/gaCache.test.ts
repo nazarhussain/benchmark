@@ -1,7 +1,7 @@
 import {expect} from "chai";
-import {Benchmark} from "../../src/types";
-import {getGaCacheHistoryProvider} from "../../src/history/gaCache";
-import {isGaRun} from "../../src/github/context";
+import {Benchmark} from "../../../src/types";
+import {getGaCacheHistoryProvider} from "../../../src/history/gaCache";
+import {isGaRun} from "../../../src/github/context";
 
 // Currently fails with
 //
