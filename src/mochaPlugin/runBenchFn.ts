@@ -13,6 +13,8 @@ export type BenchmarkOpts = {
   warmUpMs?: number;
   /** Convergance factor (0,1) at which the benchmark automatically stops. Set to 1 to disable */
   convergeFactor?: number;
+  /** If fn() contains a foor loop repeating a task N times, you may set runsFactor = N to scale down the results. */
+  runsFactor?: number;
   // For mocha
   only?: boolean;
   skip?: boolean;
@@ -45,6 +47,7 @@ export async function runBenchFn<T, T2>(
   const minMs = opts.minMs || 100;
   const warmUpMs = opts.warmUpMs !== undefined ? opts.warmUpMs : 500;
   const convergeFactor = opts.convergeFactor || 0.5 / 100; // 0.5%
+  const runsFactor = opts.runsFactor || 1;
   const warmUpNs = BigInt(warmUpMs) * BigInt(1e6);
   const sampleEveryMs = 100;
 
@@ -127,13 +130,13 @@ export async function runBenchFn<T, T2>(
     throw Error("No run was completed in time");
   }
 
-  const averageNs = totalNs / BigInt(runIdx);
+  const averageNs = Number(totalNs / BigInt(runIdx)) / runsFactor;
 
   return {
     result: {
       id: opts.id,
-      averageNs: Number(averageNs),
-      runsDone: runIdx - 1,
+      averageNs,
+      runsDone: runIdx,
       totalMs: Date.now() - startRunMs,
       threshold: opts.noThreshold === true ? Infinity : opts.threshold,
     },
