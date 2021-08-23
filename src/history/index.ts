@@ -8,11 +8,6 @@ import {S3HistoryProvider} from "./s3";
 export {resolveHistoryLocation};
 
 export function getHistoryProvider(opts: Opts): IHistoryProvider {
-  if (opts.historyLocal) {
-    const dirpath = typeof opts.historyLocal === "string" ? opts.historyLocal : optionsDefault.historyLocalPath;
-    return new LocalHistoryProvider(dirpath);
-  }
-
   if (opts.historyGaCache) {
     const cacheKey = typeof opts.historyGaCache === "string" ? opts.historyGaCache : optionsDefault.historyCacheKey;
     return getGaCacheHistoryProvider(cacheKey);
@@ -22,5 +17,7 @@ export function getHistoryProvider(opts: Opts): IHistoryProvider {
     return S3HistoryProvider.fromEnv();
   }
 
-  throw Error("Must specify a history option");
+  // if opts.historyLocal or else
+  const dirpath = typeof opts.historyLocal === "string" ? opts.historyLocal : optionsDefault.historyLocalPath;
+  return new LocalHistoryProvider(dirpath);
 }
