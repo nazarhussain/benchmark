@@ -7,6 +7,7 @@ export type BenchmarkOpts = {
   // For mocha
   only?: boolean;
   skip?: boolean;
+  timeout?: number;
 };
 
 export type BenchmarkRunOpts = BenchmarkOpts & {
