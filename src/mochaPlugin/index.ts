@@ -11,12 +11,7 @@ const optsMap = new Map<Mocha.Suite, BenchmarkOpts>();
 
 type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
-export function itBench<T, T2>(opts: BenchmarkRunOptsWithFn<T, T2>): void;
-export function itBench<T, T2>(
-  idOrOpts: string | Omit<BenchmarkRunOptsWithFn<T, T2>, "fn">,
-  fn: (arg: T) => void
-): void;
-export function itBench<T, T2>(
+const itBenchFn: ItBenchFn = function itBench<T, T2>(
   idOrOpts: string | PartialBy<BenchmarkRunOptsWithFn<T, T2>, "fn">,
   fn?: (arg: T) => void | Promise<void>
 ): void {
@@ -27,21 +22,12 @@ export function itBench<T, T2>(
   // if (this.averageNs === null) this.averageNs = result.averageNs;
   // result.factor = result.averageNs / this.averageNs;
 
-  let opts: BenchmarkRunOptsWithFn<T, T2>;
-  if (typeof idOrOpts === "string") {
-    if (!fn) throw Error("fn arg must be set");
-    opts = {id: idOrOpts, fn};
-  } else {
-    if (fn) {
-      opts = {...idOrOpts, fn};
-    } else {
-      const optsWithFn = idOrOpts as BenchmarkRunOptsWithFn<T, T2>;
-      if (!optsWithFn.fn) throw Error("opts.fn arg must be set");
-      opts = optsWithFn;
-    }
-  }
+  let opts = coerceToOptsObj(idOrOpts, fn);
 
-  it(opts.id, async function () {
+  // Apply mocha it opts
+  const itFn = opts.only ? it.only : opts.skip ? it.skip : it;
+
+  itFn(opts.id, async function () {
     const parent = getParentSuite(this);
     const optsParent = getOptsFromParent(parent);
     opts = Object.assign({}, optsParent, opts);
@@ -80,6 +66,56 @@ export function itBench<T, T2>(
       fs.writeFileSync(filepath, runsNs.join("\n"));
     }
   });
+};
+
+interface ItBenchFn {
+  <T, T2>(opts: BenchmarkRunOptsWithFn<T, T2>): void;
+  <T, T2>(idOrOpts: string | Omit<BenchmarkRunOptsWithFn<T, T2>, "fn">, fn: (arg: T) => void): void;
+  <T, T2>(
+    idOrOpts: string | PartialBy<BenchmarkRunOptsWithFn<T, T2>, "fn">,
+    fn?: (arg: T) => void | Promise<void>
+  ): void;
+}
+
+interface ItBench extends ItBenchFn {
+  only: ItBenchFn;
+  skip: ItBenchFn;
+}
+
+export const itBench = itBenchFn as ItBench;
+
+itBench.only = function itBench(idOrOpts, fn): void {
+  const opts = coerceToOptsObj(idOrOpts, fn);
+  opts.only = true;
+  itBenchFn(opts);
+} as ItBenchFn;
+
+itBench.skip = function itBench(idOrOpts, fn): void {
+  const opts = coerceToOptsObj(idOrOpts, fn);
+  opts.skip = true;
+  itBenchFn(opts);
+} as ItBenchFn;
+
+function coerceToOptsObj<T, T2>(
+  idOrOpts: string | PartialBy<BenchmarkRunOptsWithFn<T, T2>, "fn">,
+  fn?: (arg: T) => void | Promise<void>
+): BenchmarkRunOptsWithFn<T, T2> {
+  let opts: BenchmarkRunOptsWithFn<T, T2>;
+
+  if (typeof idOrOpts === "string") {
+    if (!fn) throw Error("fn arg must be set");
+    opts = {id: idOrOpts, fn};
+  } else {
+    if (fn) {
+      opts = {...idOrOpts, fn};
+    } else {
+      const optsWithFn = idOrOpts as BenchmarkRunOptsWithFn<T, T2>;
+      if (!optsWithFn.fn) throw Error("opts.fn arg must be set");
+      opts = optsWithFn;
+    }
+  }
+
+  return opts;
 }
 
 /**

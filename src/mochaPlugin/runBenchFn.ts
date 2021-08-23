@@ -4,6 +4,9 @@ export type BenchmarkOpts = {
   runs?: number;
   maxMs?: number;
   minMs?: number;
+  // For mocha
+  only?: boolean;
+  skip?: boolean;
 };
 
 export type BenchmarkRunOpts = BenchmarkOpts & {
