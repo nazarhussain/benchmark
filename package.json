@@ -20,7 +20,7 @@
     "test": "mocha test/**/*.test.ts",
     "lint": "eslint --color --ext .ts src/ test/",
     "prepublishOnly": "yarn build",
-    "benchmark": "node -r ts-node/register src/cli.ts 'test/**/*.perf.ts'"
+    "benchmark": "node -r ts-node/register src/cli.ts 'test/perf/**/*.test.ts'"
   },
   "devDependencies": {
     "@types/chai": "^4.2.19",

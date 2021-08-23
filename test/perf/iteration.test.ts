@@ -1,5 +1,5 @@
 import assert from "assert";
-import {itBench, setBenchOpts} from "../src";
+import {itBench, setBenchOpts} from "../../src";
 
 // As of Jun 17 2021
 // Compare state root
@@ -38,5 +38,32 @@ describe("Array iteration", () => {
     // Uncomment below to cause a guaranteed performance regression
     // arr.reduce((total, curr) => total + curr, 0);
     // arr.reduce((total, curr) => total + curr, 0);
+  });
+
+  // Test before and beforeEach hooks
+
+  itBench({
+    id: "sum array with reduce beforeEach",
+    beforeEach: () => Array.from({length: 1e4}, (_, i) => i),
+    fn: () => {
+      arr.reduce((total, curr) => total + curr, 0);
+
+      // Uncomment below to cause a guaranteed performance regression
+      // arr.reduce((total, curr) => total + curr, 0);
+      // arr.reduce((total, curr) => total + curr, 0);
+    },
+  });
+
+  itBench({
+    id: "sum array with reduce before beforeEach",
+    before: () => Array.from({length: 1e4}, (_, i) => i),
+    beforeEach: (arr) => arr.slice(0),
+    fn: () => {
+      arr.reduce((total, curr) => total + curr, 0);
+
+      // Uncomment below to cause a guaranteed performance regression
+      // arr.reduce((total, curr) => total + curr, 0);
+      // arr.reduce((total, curr) => total + curr, 0);
+    },
   });
 });

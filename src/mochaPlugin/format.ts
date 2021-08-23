@@ -1,36 +1,10 @@
 /* eslint-disable no-console */
 
-export type BenchmarkOpts = {
-  runs?: number;
-  maxMs?: number;
-  minMs?: number;
-};
-
-export type BenchmarkRunOpts = BenchmarkOpts & {
-  id: string;
-};
-
-export type BenchmarkRunOptsWithFn<T> = BenchmarkOpts & {
-  id: string;
-  fn: (arg: T) => void | Promise<void>;
-  beforeEach?: (i: number) => T | Promise<T>;
-};
-
 export type BenchmarkResult = {
   id: string;
   averageNs: number;
   runsDone: number;
   totalMs: number;
-};
-
-export type BenchmarkResultCompared = BenchmarkResult & {
-  ratio: number | null;
-  isFailed: boolean;
-  isBetter: boolean;
-};
-
-export type BenchmarkResultDetail = {
-  runsNs: bigint[];
 };
 
 export function formatResultRow(
