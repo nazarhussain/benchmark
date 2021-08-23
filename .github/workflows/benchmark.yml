@@ -29,14 +29,6 @@ jobs:
         with:
           node-version: "14.16.0"
 
-      - name: GA cache benchmark data
-        uses: actions/cache@v2
-        # WARNING! Using the approach benchmark data won't be persisted if the workflow fails
-        if: always()
-        with:
-          path: ./cache
-          key: ${{ runner.os }}-benchmark-2
-
       - name: Install
         run: yarn install --frozen-lockfile
 
@@ -47,14 +39,6 @@ jobs:
         run: yarn benchmark --local ./cache --noThrow ${{ github.event_name == 'push' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload cached data
-        if: always()
-        uses: actions/upload-artifact@v2
-        with:
-          name: benchmark-cache-debug
-          path: ./cache
-          if-no-files-found: error
 
   # Currently not working, see https://github.com/actions/toolkit/issues/852
   ###########
