@@ -49,8 +49,9 @@ void yargs
 `
   )
   .epilogue("For more information, check the CLI reference _TBD_")
-  .alias("h", "help")
-  .alias("v", "version")
+  // DO NOT USE "h", "v" aliases. Those break the --help functionality
+  // .alias("h", "help")
+  // .alias("v", "version")
   .recommendCommands()
   .fail((msg, err) => {
     if (msg) {
