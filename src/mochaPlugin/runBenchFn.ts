@@ -36,7 +36,8 @@ export type BenchmarkRunOptsWithFn<T, T2> = BenchmarkOpts & {
 };
 
 export async function runBenchFn<T, T2>(
-  opts: BenchmarkRunOptsWithFn<T, T2>
+  opts: BenchmarkRunOptsWithFn<T, T2>,
+  persistRunsNs?: boolean
 ): Promise<{result: BenchmarkResult; runsNs: bigint[]}> {
   const minRuns = opts.minRuns || 1;
   const maxRuns = opts.maxRuns || Infinity;
@@ -84,7 +85,8 @@ export async function runBenchFn<T, T2>(
       // Persist results
       runIdx += 1;
       totalNs += runNs;
-      runsNs.push(runNs);
+      // If the caller wants the exact times of all runs, persist them
+      if (persistRunsNs) runsNs.push(runNs);
 
       // When is a good time to stop a benchmark? A naive answer is after N miliseconds or M runs.
       // This code aims to stop the benchmark when the average fn run time has converged at a value
