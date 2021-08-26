@@ -9,8 +9,16 @@ export type BenchmarkOpts = {
   maxMs?: number;
   /** Min total miiliseconds of runs before considering stopping the benchmark after converging */
   minMs?: number;
-  /** Minimum real benchmark function run time before starting to count towards results. Set to 0 to not warm-up */
-  warmUpMs?: number;
+  /**
+   * Maximum real benchmark function run time before starting to count towards results. Set to 0 to not warm-up.
+   * May warm up for less ms if the `maxWarmUpRuns` condition is met first.
+   */
+  maxWarmUpMs?: number;
+  /**
+   * Maximum benchmark function runs before starting to count towards results. Set to 0 to not warm-up.
+   * May warm up for less ms if the `maxWarmUpMs` condition is met first.
+   */
+  maxWarmUpRuns?: number;
   /** Convergance factor (0,1) at which the benchmark automatically stops. Set to 1 to disable */
   convergeFactor?: number;
   /** If fn() contains a foor loop repeating a task N times, you may set runsFactor = N to scale down the results. */
@@ -47,10 +55,13 @@ export async function runBenchFn<T, T2>(
   const maxRuns = opts.maxRuns || Infinity;
   const maxMs = opts.maxMs || Infinity;
   const minMs = opts.minMs || 100;
-  const warmUpMs = opts.warmUpMs !== undefined ? opts.warmUpMs : 500;
+  const maxWarmUpMs = opts.maxWarmUpMs !== undefined ? opts.maxWarmUpMs : 500;
+  const maxWarmUpRuns = opts.maxWarmUpRuns !== undefined ? opts.maxWarmUpRuns : 1000;
+  // Ratio of maxMs that the warmup is allow to take from ellapsedMs
+  const maxWarmUpRatio = 0.5;
   const convergeFactor = opts.convergeFactor || 0.5 / 100; // 0.5%
   const runsFactor = opts.runsFactor || 1;
-  const warmUpNs = BigInt(warmUpMs) * BigInt(1e6);
+  const maxWarmUpNs = BigInt(maxWarmUpMs) * BigInt(1e6);
   const sampleEveryMs = 100;
 
   const runsNs: bigint[] = [];
@@ -59,9 +70,11 @@ export async function runBenchFn<T, T2>(
   let runIdx = 0;
   let totalNs = BigInt(0);
   let totalWarmUpNs = BigInt(0);
+  let totalWarmUpRuns = 0;
   let prevAvg0 = 0;
   let prevAvg1 = 0;
   let lastConvergenceSample = startRunMs;
+  let isWarmUp = maxWarmUpNs > 0 && maxWarmUpRuns > 0;
 
   const inputAll = opts.before ? await opts.before() : (undefined as unknown as T2);
 
@@ -88,9 +101,15 @@ export async function runBenchFn<T, T2>(
       await new Promise((r) => setTimeout(r, 0));
     }
 
-    if (totalWarmUpNs < warmUpNs) {
+    if (isWarmUp) {
       // Warm-up, do not count towards results
+      totalWarmUpRuns += 1;
       totalWarmUpNs += runNs;
+
+      // On any warm-up finish condition, mark isWarmUp = true to prevent having to check them again
+      if (totalWarmUpNs >= maxWarmUpNs || totalWarmUpRuns >= maxWarmUpRuns || ellapsedMs / maxMs >= maxWarmUpRatio) {
+        isWarmUp = false;
+      }
     } else {
       // Persist results
       runIdx += 1;
@@ -134,7 +153,23 @@ export async function runBenchFn<T, T2>(
   }
 
   if (runIdx === 0) {
-    throw Error("No run was completed in time");
+    // Try to guess what happened
+    if (totalWarmUpRuns > 0) {
+      throw Error(
+        `
+No run was completed before 'maxMs' ${maxMs}, but did ${totalWarmUpRuns} warm-up runs.
+Consider adjusting 'maxWarmUpMs' or 'maxWarmUpRuns' options orextend 'maxMs'
+if your function is very slow.
+`.trim()
+      );
+    } else {
+      throw Error(
+        `
+No run was completed before 'maxMs' ${maxMs}. Consider extending the 'maxMs' time if
+either the before(), beforeEach() or fn() functions are too slow.
+`.trim()
+      );
+    }
   }
 
   const averageNs = Number(totalNs / BigInt(runIdx)) / runsFactor;
