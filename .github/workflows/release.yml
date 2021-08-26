@@ -36,14 +36,10 @@ jobs:
     needs: tag
     if: needs.tag.outputs.tag != ''
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Setup Nodejs
-        uses: actions/setup-node@v2
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
         with:
-          node-version: "12.x"
-          registry-url: "https://registry.npmjs.org"
+          node-version: "lts/fermium"
 
       - run: yarn install
       - run: yarn build
@@ -78,6 +74,10 @@ jobs:
           release_name: Release ${{ needs.tag.outputs.tag }}
           prerelease: true # we can promote to release trough github
 
+      # From https://github.com/lerna/lerna/issues/2404
+      - run: echo //registry.npmjs.org/:_authToken=${NPM_TOKEN} > .npmrc
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Publish to npm registry
         run: yarn publish --access public
         env:
