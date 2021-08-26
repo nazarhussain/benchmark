@@ -15,6 +15,8 @@ export type BenchmarkOpts = {
   convergeFactor?: number;
   /** If fn() contains a foor loop repeating a task N times, you may set runsFactor = N to scale down the results. */
   runsFactor?: number;
+  /** Run `sleep(0)` after each fn() call. Use when the event loop needs to tick to free resources created by fn() */
+  yieldEventLoopAfterEach?: boolean;
   // For mocha
   only?: boolean;
   skip?: boolean;
@@ -80,6 +82,11 @@ export async function runBenchFn<T, T2>(
     const endNs = process.hrtime.bigint();
 
     const runNs = endNs - startNs;
+
+    // Useful when the event loop needs to tick to free resources created by fn()
+    if (opts.yieldEventLoopAfterEach) {
+      await new Promise((r) => setTimeout(r, 0));
+    }
 
     if (totalWarmUpNs < warmUpNs) {
       // Warm-up, do not count towards results
