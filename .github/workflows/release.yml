@@ -64,6 +64,8 @@ jobs:
           sinceTag: "${{ needs.tag.outputs.previous_tag }}"
           maxIssues: "0"
           stripGeneratorNotice: "true"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create Release
         id: create_release
