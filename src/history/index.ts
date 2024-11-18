@@ -3,7 +3,7 @@ import {resolveHistoryLocation} from "./location";
 import {LocalHistoryProvider} from "./local";
 import {getGaCacheHistoryProvider} from "./gaCache";
 import {IHistoryProvider} from "./provider";
-import {optionsDefault} from "../options";
+import {optionsDefault} from "../run/options";
 import {S3HistoryProvider} from "./s3";
 export {resolveHistoryLocation};
 

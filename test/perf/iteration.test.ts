@@ -1,5 +1,5 @@
 import assert from "assert";
-import {itBench, setBenchOpts} from "../../src";
+import {itBench, setBenchOpts} from "../../lib";
 
 // As of Jun 17 2021
 // Compare state root

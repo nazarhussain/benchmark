@@ -1,9 +1,12 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
-import Mocha from "mocha";
-import {Benchmark, BenchmarkResult} from "../types";
-import {resultsByRootSuite} from "./globalState";
+import Mocha, {MochaOptions} from "mocha";
+import {Benchmark, BenchmarkResult, onlyBenchmarkOpts, ReporterOptions} from "../types";
+import {optsByRootSuite, resultsByRootSuite} from "../run/globalState";
 import {formatResultRow} from "./format";
 import {getRootSuite} from "./utils";
+import {connectHistoryProvider, getBenchmark, processBenchmark} from "../run/process";
+import {IHistoryProvider} from "../history/provider";
+import {loadAndValidateOptions} from "../run/options";
 
 const {
   EVENT_RUN_BEGIN,
@@ -15,88 +18,118 @@ const {
   EVENT_SUITE_END,
 } = Mocha.Runner.constants;
 
-interface ReporterConstructor {
-  new (runner: Mocha.Runner, options: Mocha.MochaOptions): Mocha.reporters.Base;
-}
+// eslint-disable-next-line no-console
+const consoleLog = console.log;
+const color = Mocha.reporters.Base.color;
+const symbols = Mocha.reporters.Base.symbols;
 
-export function benchmarkReporterWithPrev(prevBench: Benchmark | null, threshold: number): ReporterConstructor {
-  const prevResults = new Map<string, BenchmarkResult>();
-  if (prevBench) {
-    for (const bench of prevBench.results) {
-      prevResults.set(bench.id, bench);
-    }
+export class BenchmarkReporter extends Mocha.reporters.Base {
+  protected indents = 0;
+  private historyProvider: IHistoryProvider;
+  private opts: ReporterOptions;
+  private prevBenchmark: Benchmark | null = null;
+  private prevResults = new Map<string, BenchmarkResult>();
+
+  constructor(runner: Mocha.Runner, options?: MochaOptions) {
+    super(runner, options);
+
+    this.opts = loadAndValidateOptions(options?.reporterOptions ?? {});
+    this.historyProvider = connectHistoryProvider(this.opts);
+
+    let n = 0;
+
+    runner.on(EVENT_RUN_BEGIN, async () => {
+      const rootSuite = getRootSuite(runner.suite);
+      const results = new Map<string, BenchmarkResult>();
+      resultsByRootSuite.set(rootSuite, results);
+      // TODO: Fetch, parse and pass the options
+      optsByRootSuite.set(rootSuite, onlyBenchmarkOpts({}));
+
+      this.prevBenchmark = await getBenchmark(this.opts, this.historyProvider);
+
+      for (const bench of this.prevBenchmark?.results ?? []) {
+        this.prevResults.set(bench.id, bench);
+      }
+      consoleLog();
+    });
+
+    runner.once(EVENT_RUN_END, async () => {
+      this.epilogue();
+    });
+
+    runner.on(EVENT_SUITE_BEGIN, (suite) => {
+      this.increaseIndent();
+      consoleLog(color("suite", "%s%s"), this.indent(), suite.title);
+    });
+
+    runner.on(EVENT_SUITE_END, () => {
+      this.decreaseIndent();
+      if (this.indents === 1) {
+        consoleLog();
+      }
+    });
+
+    runner.on(EVENT_TEST_PENDING, (test) => {
+      const fmt = this.indent() + color("pending", "  - %s");
+      consoleLog(fmt, test.title);
+    });
+
+    runner.on(EVENT_TEST_PASS, (test) => {
+      try {
+        if (!test.parent) throw Error("test has no parent");
+        const rootSuite = getRootSuite(test.parent);
+        const results = resultsByRootSuite.get(rootSuite);
+        if (!results) throw Error("root suite result not found");
+
+        const result = results.get(test.title);
+        if (result) {
+          // Render benchmark
+          const prevResult = this.prevResults.get(result.id) ?? null;
+
+          const resultRow = formatResultRow(result, prevResult, result.threshold ?? this.opts.threshold);
+          const fmt = this.indent() + color("checkmark", "  " + symbols.ok) + " " + resultRow;
+          consoleLog(fmt);
+        } else {
+          // Render regular test
+          const fmt = this.indent() + color("checkmark", "  " + symbols.ok) + color("pass", " %s");
+          consoleLog(fmt, test.title);
+        }
+      } catch (e) {
+        // Log error manually since mocha doesn't log errors thrown here
+        consoleLog(e);
+        process.exitCode = 1;
+        throw e;
+      }
+    });
+
+    runner.on(EVENT_TEST_FAIL, (test) => {
+      consoleLog(this.indent() + color("fail", "  %d) %s"), ++n, test.title);
+    });
   }
 
-  return class BenchmarkReporter extends Mocha.reporters.Base {
-    constructor(runner: Mocha.Runner, options?: Mocha.MochaOptions) {
-      super(runner, options);
+  indent(): string {
+    return Array(this.indents).join("  ");
+  }
 
-      // eslint-disable-next-line no-console
-      const consoleLog = console.log;
-      const color = Mocha.reporters.Base.color;
-      const symbols = Mocha.reporters.Base.symbols;
+  increaseIndent(): void {
+    this.indents++;
+  }
 
-      let indents = 0;
-      let n = 0;
+  decreaseIndent(): void {
+    this.indents--;
+  }
 
-      function indent(): string {
-        return Array(indents).join("  ");
-      }
-
-      runner.on(EVENT_RUN_BEGIN, function () {
-        consoleLog();
-      });
-
-      runner.on(EVENT_SUITE_BEGIN, function (suite) {
-        ++indents;
-        consoleLog(color("suite", "%s%s"), indent(), suite.title);
-      });
-
-      runner.on(EVENT_SUITE_END, function () {
-        --indents;
-        if (indents === 1) {
-          consoleLog();
-        }
-      });
-
-      runner.on(EVENT_TEST_PENDING, function (test) {
-        const fmt = indent() + color("pending", "  - %s");
-        consoleLog(fmt, test.title);
-      });
-
-      runner.on(EVENT_TEST_PASS, function (test) {
-        try {
-          if (!test.parent) throw Error("test has no parent");
-          const rootSuite = getRootSuite(test.parent);
-          const results = resultsByRootSuite.get(rootSuite);
-          if (!results) throw Error("root suite not found");
-
-          const result = results.get(test.title);
-          if (result) {
-            // Render benchmark
-            const prevResult = prevResults.get(result.id) ?? null;
-
-            const resultRow = formatResultRow(result, prevResult, result.threshold ?? threshold);
-            const fmt = indent() + color("checkmark", "  " + symbols.ok) + " " + resultRow;
-            consoleLog(fmt);
-          } else {
-            // Render regular test
-            const fmt = indent() + color("checkmark", "  " + symbols.ok) + color("pass", " %s");
-            consoleLog(fmt, test.title);
-          }
-        } catch (e) {
-          // Log error manually since mocha doesn't log errors thrown here
-          consoleLog(e);
-          process.exitCode = 1;
-          throw e;
-        }
-      });
-
-      runner.on(EVENT_TEST_FAIL, function (test) {
-        consoleLog(indent() + color("fail", "  %d) %s"), ++n, test.title);
-      });
-
-      runner.once(EVENT_RUN_END, this.epilogue.bind(this));
-    }
-  };
+  done(failures: number, fn: (failures: number) => void): void {
+    const rootSuite = getRootSuite(this.runner.suite);
+    const results = resultsByRootSuite.get(rootSuite);
+    // TODO: Fetch, parse and pass the options
+    void processBenchmark(
+      this.opts,
+      this.historyProvider,
+      this.prevBenchmark,
+      Array.from(results?.values() ?? [])
+    ).then(() => {
+      fn(failures);
+    });
+  }
 }

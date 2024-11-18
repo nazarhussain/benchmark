@@ -1,6 +1,6 @@
 import {isGaRun} from "../github/context";
 import {Opts} from "../types";
-import {optionsDefault} from "../options";
+import {optionsDefault} from "../run/options";
 
 export type HistoryLocation = {type: "local"; path: string} | {type: "ga-cache"; key: string};
 

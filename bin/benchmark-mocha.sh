@@ -1,0 +1,1 @@
+mocha --reporter lib/mocha.js "$@"

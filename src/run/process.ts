@@ -1,24 +1,31 @@
 import * as github from "@actions/github";
-import {getHistoryProvider} from "./history";
-import {resolveShouldPersist} from "./history/shouldPersist";
-import {validateBenchmark} from "./history/schema";
-import {Benchmark, BenchmarkOpts, Opts} from "./types";
-import {renderCompareWith, resolveCompareWith, resolvePrevBenchmark} from "./compare";
-import {parseBranchFromRef, getCurrentCommitInfo, shell, getCurrentBranch} from "./utils";
-import {runMochaBenchmark} from "./mochaPlugin/mochaRunner";
-import {computeBenchComparision} from "./compare/compute";
-import {postGaComment} from "./github/comment";
-import {isGaRun} from "./github/context";
+import {getHistoryProvider} from "../history";
+import {resolveShouldPersist} from "../history/shouldPersist";
+import {validateBenchmark} from "../history/schema";
+import {Benchmark, BenchmarkOpts, BenchmarkResult, Opts} from "../types";
+import {renderCompareWith, resolveCompareWith, resolvePrevBenchmark} from "../compare";
+import {parseBranchFromRef, getCurrentCommitInfo, shell, getCurrentBranch} from "../utils";
+import {computeBenchComparision} from "../compare/compute";
+import {postGaComment} from "../github/comment";
+import {isGaRun} from "../github/context";
+import {IHistoryProvider} from "../history/provider";
 
 /* eslint-disable no-console */
 
-export async function run(opts: Opts & BenchmarkOpts): Promise<void> {
-  // Sanitize opts
-  if (isNaN(opts.threshold)) throw Error("opts.threshold is not a number");
-
+export function connectHistoryProvider(opts: Opts & BenchmarkOpts): IHistoryProvider {
   // Retrieve history
   const historyProvider = getHistoryProvider(opts);
   console.log(`Connected to historyProvider: ${historyProvider.providerInfo()}`);
+
+  return historyProvider;
+}
+
+export async function getBenchmark(
+  opts: Opts & BenchmarkOpts,
+  historyProvider: IHistoryProvider
+): Promise<Benchmark | null> {
+  // Sanitize opts
+  if (isNaN(opts.threshold)) throw Error("opts.threshold is not a number");
 
   // Select prev benchmark to compare against
   const compareWith = await resolveCompareWith(opts);
@@ -30,9 +37,15 @@ export async function run(opts: Opts & BenchmarkOpts): Promise<void> {
     console.log(`No previous bencharmk found for ${renderCompareWith(compareWith)}`);
   }
 
-  // TODO: Forward all options to mocha
-  // Run benchmarks with mocha programatically
-  const results = await runMochaBenchmark(opts, prevBench);
+  return prevBench;
+}
+
+export async function processBenchmark(
+  opts: Opts & BenchmarkOpts,
+  historyProvider: IHistoryProvider,
+  prevBench: Benchmark | null,
+  results: BenchmarkResult[]
+): Promise<void> {
   if (results.length === 0) {
     throw Error("No benchmark result was produced");
   }

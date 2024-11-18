@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import {BenchmarkOpts} from "../types";
-import {optsByRootSuite, optsMap, resultsByRootSuite} from "./globalState";
+import {optsByRootSuite, optsMap, resultsByRootSuite} from "../run/globalState";
 import {BenchmarkRunOptsWithFn, runBenchFn} from "./runBenchFn";
 import {getRootSuite, getParentSuite} from "./utils";
 

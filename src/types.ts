@@ -1,6 +1,14 @@
-import {FileCollectionOptions} from "./utils/mochaCliExports";
+export type ReporterOptions = Opts & BenchmarkOpts;
 
-export type Opts = Partial<FileCollectionOptions> & {
+export type ReporterOptionsWithAliases = ReporterOptions & {
+  // Aliases
+  local?: string;
+  "ga-cache"?: string;
+  s3?: string;
+  noThreshold?: boolean;
+};
+
+export type Opts = {
   defaultBranch?: string;
   persistBranches?: string[];
   benchmarksPerBranch?: number;
@@ -11,9 +19,9 @@ export type Opts = Partial<FileCollectionOptions> & {
   persist?: boolean;
   noThrow?: boolean;
   skipPostComment?: boolean;
-  historyLocal?: string | boolean;
-  historyGaCache?: string | boolean;
-  historyS3?: boolean;
+  historyLocal?: string;
+  historyGaCache?: string;
+  historyS3?: string;
 };
 
 export type BenchmarkOpts = {
@@ -47,10 +55,9 @@ export type BenchmarkOpts = {
   // For reporter
   /** Customize the threshold for this specific benchmark. Set to Infinity to disable it */
   threshold?: number;
-  /** Equivalent to setting threshold = Infinity */
-  noThreshold?: boolean;
 
   // For mocha
+  // TODO: Decide later what to do with these
   only?: boolean;
   skip?: boolean;
 };
@@ -70,7 +77,7 @@ export function onlyBenchmarkOpts(opts: BenchmarkOpts): BenchmarkOpts {
     yieldEventLoopAfterEach: true,
     timeoutBench: true,
     threshold: true,
-    noThreshold: true,
+    // noThreshold: true,
     only: true,
     skip: true,
   };

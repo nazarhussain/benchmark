@@ -144,7 +144,7 @@ either the before(), beforeEach() or fn() functions are too slow.
       averageNs,
       runsDone: runIdx,
       totalMs: Date.now() - startRunMs,
-      threshold: opts.noThreshold === true ? Infinity : opts.threshold,
+      threshold: opts.threshold,
     },
     runsNs,
   };

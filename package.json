@@ -6,7 +6,7 @@
   "author": "dapplion <35266934+dapplion@users.noreply.github.com>",
   "license": "MIT",
   "bin": {
-    "benchmark": "lib/cli.js"
+    "benchmark": "bin/benchmark.sh"
   },
   "files": [
     "lib/**/*.d.ts",
@@ -15,6 +15,14 @@
     "*.d.ts",
     "*.js"
   ],
+  "exports": {
+    ".": {
+      "require": "./lib/index.js"
+    },
+    "./mocha": {
+      "require": "./lib/mocha.js"
+    }
+  },
   "scripts": {
     "build": "tsc -p tsconfig.build.json && chmod +x lib/cli.js",
     "test:unit": "mocha test/unit/**/*.test.ts",
@@ -28,7 +36,6 @@
     "@types/mocha": "^8.2.2",
     "@types/node": "^15.12.4",
     "@types/rimraf": "^3.0.0",
-    "@types/yargs": "^17.0.0",
     "@typescript-eslint/eslint-plugin": "^4.28.0",
     "@typescript-eslint/parser": "^4.28.0",
     "chai": "^4.3.4",
@@ -45,13 +52,18 @@
   "dependencies": {
     "@actions/cache": "^1.0.7",
     "@actions/github": "^5.0.0",
-    "ajv": "^8.6.0",
+    "ajv": "^8.17.1",
     "aws-sdk": "^2.932.0",
     "csv-parse": "^4.16.0",
     "csv-stringify": "^5.6.2",
-    "yargs": "^17.1.1"
+    "yaml": "^2.6.0"
   },
   "peerDependencies": {
     "mocha": ">8.0.0"
+  },
+  "peerDependenciesMeta": {
+    "mocha": {
+      "optional": true
+    }
   }
 }
